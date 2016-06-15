@@ -29,7 +29,7 @@ func (r *Router) Add(method string, path string, h http.Handler) {
 	r.handlers[path] = append(r.handlers[path], &Endpoint{method: method, Handler: h})
 }
 
-func (r *Router) ServeHTTP(w http.ResponseWriter, req *Request) {
+func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	if eds, ok := r.handlers[req.URL.Path]; ok {
 		for _, ed := range eds {
@@ -40,11 +40,11 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *Request) {
 		}
 
 		logger.Info.Printf("%s:%s Method Not Allowed", req.Method, req.URL.Path)
-		HTTP.Error((w, "Method Not Allowed", 405)
+		http.Error(w, "Method Not Allowed", 405)
 
 	} else {
 		logger.Info.Printf("%s Not Found", req.URL.Path)
-		HTTP.Error(w, "URL Not Found", 404)
+		http.Error(w, "URL Not Found", 404)
 	}
 }
 
