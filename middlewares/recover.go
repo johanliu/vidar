@@ -1,7 +1,14 @@
 package middlewares
 
-func RecoverHander(h http.Handler) http.Handler {
+import (
+	"net/http"
+
+	"github.com/johanliu/Vidar/logger"
+)
+
+func RecoverHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
 		defer func() {
 			if err := recover(); err != nil {
 				logger.Error.Printf("panic: %v", err)
@@ -10,5 +17,6 @@ func RecoverHander(h http.Handler) http.Handler {
 		}()
 
 		h.ServeHTTP(w, r)
-	}
+
+	})
 }

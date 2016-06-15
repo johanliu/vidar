@@ -10,6 +10,8 @@ import (
 )
 
 func defaultHandler(w http.ResponseWriter, r *http.Request) {
+	logger.Info.Println(r)
+
 	fmt.Fprintf(w, "Hello World!")
 }
 
@@ -21,9 +23,10 @@ func main() {
 
 	//TODO router should be defined in sole file
 
-	logWrapper := utils.New(middlewares.LoggingHandler)
+	Wrapper := utils.New(middlewares.LoggingHandler)
+	Wrapper = Wrapper.Append(middlewares.RecoverHandler)
 
-	http.Handle("/", logWrapper.Wrap(defaultHandler))
+	http.Handle("/", Wrapper.Wrap(defaultHandler))
 	logger.Info.Printf("Running on %s:%s", host, port)
 	http.ListenAndServe(host+":"+port, nil)
 }
