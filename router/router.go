@@ -8,6 +8,7 @@ import (
 
 type Router struct {
 	handlers map[string][]*Endpoint
+	NotFound http.Handler
 }
 
 type Endpoint struct {
@@ -43,6 +44,12 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Method Not Allowed", 405)
 
 	} else {
+
+		if r.NotFound != nil {
+			r.NotFound.ServeHTTP(w, req)
+			return
+		}
+
 		logger.Info.Printf("%s Not Found", req.URL.Path)
 		http.Error(w, "URL Not Found", 404)
 	}
