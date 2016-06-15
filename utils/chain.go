@@ -1,6 +1,10 @@
 package utils
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/johanliu/Vidar/logger"
+)
 
 type Ring func(http.Handler) http.Handler
 
@@ -12,7 +16,15 @@ func New(ring ...Ring) Chain {
 	return Chain{append([]Ring{}, ring...)}
 }
 
-func (c Chain) Wrap(h http.Handler) http.Handler {
+func (c Chain) Wrap(h http.HandlerFunc) http.Handler {
+	return c.wrapInternal(http.HandlerFunc(h))
+}
+
+func (c Chain) wrapInternal(h http.Handler) http.Handler {
+	if h == nil {
+		logger.Error.Println("Handler can not be nil to be wrapped")
+	}
+
 	for i := range c.rings {
 		h = c.rings[len(c.rings)-(i+1)](h)
 	}
@@ -20,6 +32,10 @@ func (c Chain) Wrap(h http.Handler) http.Handler {
 }
 
 func (c Chain) Append(ring Ring) Chain {
+	if ring == nil {
+		logger.Error.Println("nil Handler can not be appended ")
+	}
+
 	return Chain{append(c.rings, ring)}
 }
 

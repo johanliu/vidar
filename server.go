@@ -1,16 +1,29 @@
 package main
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/johanliu/Vidar/logger"
+	"github.com/johanliu/Vidar/middlewares"
+	"github.com/johanliu/Vidar/utils"
+)
+
+func defaultHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello World!")
+}
 
 func main() {
 
-	//TODO
+	//TODO: read from config file
 	port := "8080"
 	host := "localhost"
 
-	//TODO router
+	//TODO router should be defined in sole file
 
-	mux := http.NewServeMux()
-	logger.Info.Println("Running on %s:%s", host, port)
-	http.ListenAndServe(host+":"+port, mux)
+	logWrapper := utils.New(middlewares.LoggingHandler)
+
+	http.Handle("/", logWrapper.Wrap(defaultHandler))
+	logger.Info.Printf("Running on %s:%s", host, port)
+	http.ListenAndServe(host+":"+port, nil)
 }

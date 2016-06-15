@@ -5,28 +5,30 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+
+	"github.com/johanliu/Vidar/config"
 )
 
 var (
 	Debug   *log.Logger
 	Info    *log.Logger
-	Warning *log.logger
-	Error   *log.logger
+	Warning *log.Logger
+	Error   *log.Logger
 )
 
 func init() {
 	// TODO
 	path := "service.log"
 
-	debugOutput := ioutil.Discard
-	infoOutput := os.Stdout
-	warningOutput := os.Stdout
-	errorOutput := io.MultiWriter(path, os.Stderr)
-
-	file, err := os.OpenFile(config, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	file, err := os.OpenFile(config.Config.Log.Path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalln("Failed to open %s: %s", path, err)
 	}
+
+	debugOutput := ioutil.Discard
+	infoOutput := os.Stdout
+	warningOutput := os.Stdout
+	errorOutput := io.MultiWriter(file, os.Stderr)
 
 	Debug = log.New(debugOutput, "[TRACE]: ", log.Ldate|log.Ltime|log.Lshortfile)
 

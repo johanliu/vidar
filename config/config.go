@@ -9,16 +9,16 @@ import (
 )
 
 type tomlConfig struct {
-	Title string
-	Log   struct {
+	Version string
+	Log     struct {
 		Level string
 		Path  string
 	}
 }
 
-const configFile string = "../default.toml"
+const configFile string = "default.toml"
 
-var config tomlConfig
+var Config tomlConfig
 
 func init() {
 	f, err := os.Open(configFile)
@@ -33,7 +33,7 @@ func init() {
 		log.Panicln("Failed to read config file: %s", err)
 	}
 
-	if err := toml.Unmarshal(buf, &config); err != nil {
+	if err := toml.Unmarshal(buf, &Config); err != nil {
 		log.Panicf("Failed to unmarshal config file: %s", err)
 	}
 }
