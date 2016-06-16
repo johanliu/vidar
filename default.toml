@@ -3,3 +3,7 @@ version = "0.0.1"
 [log]
 level = "DEBUG"
 path = "service.log"
+
+[server]
+host = "localhost"
+port = "8080"

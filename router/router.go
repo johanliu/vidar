@@ -71,4 +71,8 @@ func (r *Router) PUT(path string, h http.Handler) {
 	r.Add("PUT", path, h)
 }
 
+func (r *Router) PATCH(path string, h http.Handler) {
+	r.Add("PATCH", path, h)
+}
+
 // TODO: add regex or tree-based path resolution

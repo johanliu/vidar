@@ -14,6 +14,10 @@ type tomlConfig struct {
 		Level string
 		Path  string
 	}
+	Server struct {
+		Host string
+		Port string
+	}
 }
 
 const configFile string = "default.toml"
