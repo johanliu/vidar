@@ -8,21 +8,23 @@ A lightweight Golang web framework
 package main
 
 import (
-	"fmt"
-	"net/http"
-
 	"github.com/johanliu/Vidar"
+  "github.com/johanliu/Vidar/context"
 	"github.com/johanliu/Vidar/middlewares"
 	"github.com/johanliu/Vidar/utils"
 )
 
-func indexHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello World!")
+func indexHandler(c *Context) {
+	result := map[string]string{
+		"version" : "0.0.1",
+		"name" : "Vidar"
+	}
+
+	c.JSON(202, result)
 }
 
-func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotFound)
-	fmt.Fprint(w, "Page Not Found!")
+func NotFoundHandler(c *Context) {
+	c.Text("Page Not Found!")
 }
 
 func main() {

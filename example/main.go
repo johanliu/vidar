@@ -10,7 +10,7 @@ import (
 	"github.com/johanliu/Vidar/utils"
 )
 
-func indexHandler(w http.ResponseWriter, r *http.Request) {
+func indexHandler(c *Context) {
 	result := map[string]string{"version": "hello world!"}
 
 	c := &context.Context{Response: context.Response{ResponseWriter: w}, Request: r}
