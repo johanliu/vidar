@@ -8,10 +8,10 @@ A lightweight Golang web framework
 package main
 
 import (
-	"github.com/johanliu/Vidar"
-  "github.com/johanliu/Vidar/context"
-	"github.com/johanliu/Vidar/middlewares"
-	"github.com/johanliu/Vidar/utils"
+    "github.com/johanliu/Vidar"
+    "github.com/johanliu/Vidar/context"
+    "github.com/johanliu/Vidar/middlewares"
+    "github.com/johanliu/Vidar/utils"
 )
 
 func indexHandler(c *Context) {
