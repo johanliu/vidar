@@ -5,12 +5,16 @@ import (
 	"net/http"
 
 	"github.com/johanliu/Vidar"
+	"github.com/johanliu/Vidar/context"
 	"github.com/johanliu/Vidar/middlewares"
 	"github.com/johanliu/Vidar/utils"
 )
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello World!")
+	result := map[string]string{"version": "hello world!"}
+
+	c := &context.Context{Response: context.Response{ResponseWriter: w}, Request: r}
+	c.JSON(202, result)
 }
 
 func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
@@ -25,8 +29,8 @@ func main() {
 
 	v := vidar.New()
 
-	v.Route.Add("GET", "/", commonHandler.Wrap(indexHandler))
-	v.Route.Add("POST", "/", commonHandler.Wrap(indexHandler))
+	v.Route.GET("/", commonHandler.Wrap(indexHandler))
+	v.Route.POST("/", commonHandler.Wrap(indexHandler))
 	v.Route.NotFound = commonHandler.Wrap(NotFoundHandler)
 
 	v.Run()

@@ -17,6 +17,7 @@ func New() *Vidar {
 	return &Vidar{router.New()}
 }
 
+//TODO: Implement cgi and fast cgi interface
 func (v *Vidar) Run(addr ...string) error {
 
 	address, err := resolveAddress(addr...)

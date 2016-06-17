@@ -24,14 +24,14 @@ func (ctx *Context) getQuery(key string) (string, bool) {
 	return "", false
 }
 
-func (ctx *Context) Params(key string) (string, bool) {
-	return ctx.Parameters.getParam(key)
+func (param *parameters) Params(key string) (string, bool) {
+	return param.getParams(key)
 }
 
-func (params Parameters) getParam(key string) (string, bool) {
-	for _, param := range params {
-		if param.Key == key {
-			return param.Value, true
+func (params *parameters) getParams(key string) (string, bool) {
+	for _, param := range *params {
+		if param.key == key {
+			return param.value, true
 		}
 	}
 

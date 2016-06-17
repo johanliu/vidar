@@ -53,5 +53,5 @@ func main() {
     - Parameter checker
     - Request/Response transformation
 5. Utilities: Convenient tools to form data, file uploads, cookies, sessions, headers and other HTTP-related metadata.
-6. Internal TCP/IP Server(optional): Built-in HTTP development server and support for others.
+6. TCP/IP Server(optional): Built-in development server and support for cgi and fastcgi server.
 7. Templates(optional): Fast and golang built-in template engine and support for popular templates.

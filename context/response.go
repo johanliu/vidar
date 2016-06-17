@@ -1,13 +1,49 @@
 package context
 
-func (ctx *Context) Status(code int) {
-	ctx.ResponseWriter.WriteHeader(code)
+import "net/http"
+
+type Response struct {
+	http.ResponseWriter
+	status        int
+	contentType   string
+	contentLength int
 }
 
-func (ctx *Context) Header(key string, value string) {
-	if len(value) == 0 {
-		ctx.ResponseWriter.Header().Del(key)
-	} else {
-		ctx.ResponseWriter.Header().Set(key, value)
+func (response *Response) Write(data []byte) (int, error) {
+	if response.status == 0 {
+		response.status = http.StatusOK
 	}
+
+	size, err := response.ResponseWriter.Write(data)
+	response.contentLength += size
+
+	return size, err
+}
+
+func (response *Response) SetContentType(ct string) error {
+	return response.SetHeader("Content-Type", ct)
+}
+
+func (response *Response) SetStatus(code int) error {
+	response.ResponseWriter.WriteHeader(code)
+
+	return nil
+}
+
+func (response *Response) SetHeader(key string, value string) error {
+	if len(value) == 0 {
+		response.ResponseWriter.Header().Del(key)
+	} else {
+		response.ResponseWriter.Header().Set(key, value)
+	}
+
+	return nil
+}
+
+func (response *Response) GetHeader(key string) string {
+	return response.ResponseWriter.Header().Get(key)
+}
+
+func (response *Response) Size() (int, error) {
+	return response.contentLength, nil
 }
