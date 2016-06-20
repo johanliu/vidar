@@ -48,12 +48,12 @@ func main() {
 
 1. Routing: Requests to function-call mapping with support for clean and dynamic URLs.
 2. Logger: Log the STDOUT and STDERROR messages based on DEBUG, INFO, WARNING, ERROR level.
-3. Context: Share request information and others between handler by each request session.
+3. Context: Process Request/Response information by each request session.
 4. Middlewares: Various processing middlewares used by application-layer which support customization.
     - Timing/Logging
     - Recover
     - Parameter checker
-    - Request/Response transformation
+    - etc
 5. Utilities: Convenient tools to form data, file uploads, cookies, sessions, headers and other HTTP-related metadata.
 6. TCP/IP Server(optional): Built-in development server and support for cgi and fastcgi server.
 7. Templates(optional): Fast and golang built-in template engine and support for popular templates.
