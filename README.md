@@ -15,6 +15,10 @@ import (
 )
 
 func indexHandler(c *Context) {
+
+    name := c.Form("name")
+    // name := c.Form("name", "jay", "johan")
+
 	result := map[string]string{
 		"version" : "0.0.1",
 		"name" : "Vidar"
