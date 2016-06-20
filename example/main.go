@@ -8,7 +8,9 @@ import (
 )
 
 func indexHandler(c *context.Context) {
-	result := map[string]string{"message": "Hello World!"}
+	name := c.Form("name")
+	// name := c.Form("name", "jay", "johan")
+	result := map[string]string{"message": "hello" + name[0]}
 	c.JSON(202, result)
 }
 

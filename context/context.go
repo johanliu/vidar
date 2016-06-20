@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 
 	"github.com/johanliu/Vidar/logger"
 )
 
-type parameters []parameter
+type Parameters []parameter
 
 type parameter struct {
 	key   string
@@ -18,16 +19,18 @@ type parameter struct {
 
 type Context struct {
 	Response
-	parameters
+	Parameters
+	Values    url.Values
 	Request   *http.Request
 	container map[string]interface{}
 	status    int
 }
 
-func New(w http.ResponseWriter, r *http.Request) (ctx *Context) {
+func New(w http.ResponseWriter, r *http.Request) *Context {
 	return &Context{
-		Response: Response{ResponseWriter: w},
-		Request:  r,
+		Response:   Response{ResponseWriter: w},
+		Request:    r,
+		Parameters: []parameter{},
 	}
 }
 

@@ -1,1 +1,2 @@
 [ERROR]: 2016/06/16 16:53:06 server.go:43: Server start failed: listen tcp 127.0.0.1:8080: bind: address already in use
+[ERROR]: 2016/06/20 20:17:55 vidar.go:31: Server start failed: listen tcp 127.0.0.1:8080: bind: address already in use
