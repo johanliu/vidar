@@ -15,7 +15,6 @@ import (
 )
 
 func indexHandler(c *Context) {
-
     name := c.Form("name")
     // name := c.Form("name", "jay", "johan")
 
@@ -25,6 +24,11 @@ func indexHandler(c *Context) {
 	}
 
 	c.JSON(200, result)
+}
+
+func personHandler(c Context) {
+    name := c.Params("name")
+    c.Text("Hello %s", name)
 }
 
 func NotFoundHandler(c *Context) {
@@ -39,7 +43,7 @@ func main() {
 	v := vidar.New()
 
 	v.Route.GET("/", commonHandler.Wrap(indexHandler))
-	v.Route.POST("/", commonHandler.Wrap(indexHandler))
+	v.Route.POST("/person/:name", commonHandler.Wrap(personHandler))
 	v.Route.NotFound = commonHandler.Wrap(NotFoundHandler)
 
 	v.Run()
