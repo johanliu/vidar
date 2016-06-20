@@ -20,8 +20,8 @@ func (response *Response) Write(data []byte) (int, error) {
 	return size, err
 }
 
-func (response *Response) SetContentType(ct string) error {
-	return response.SetHeader("Content-Type", ct)
+func (response *Response) SetContentType(value string) error {
+	return response.SetHeader("Content-Type", value)
 }
 
 func (response *Response) SetStatus(code int) error {

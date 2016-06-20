@@ -20,11 +20,11 @@ func indexHandler(c *Context) {
 		"name" : "Vidar"
 	}
 
-	c.JSON(202, result)
+	c.JSON(200, result)
 }
 
 func NotFoundHandler(c *Context) {
-	c.Text("Page Not Found!")
+	c.Text(404, "Page Not Found!")
 }
 
 func main() {

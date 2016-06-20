@@ -1,25 +1,19 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
-
 	"github.com/johanliu/Vidar"
 	"github.com/johanliu/Vidar/context"
 	"github.com/johanliu/Vidar/middlewares"
 	"github.com/johanliu/Vidar/utils"
 )
 
-func indexHandler(c *Context) {
-	result := map[string]string{"version": "hello world!"}
-
-	c := &context.Context{Response: context.Response{ResponseWriter: w}, Request: r}
+func indexHandler(c *context.Context) {
+	result := map[string]string{"message": "Hello World!"}
 	c.JSON(202, result)
 }
 
-func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotFound)
-	fmt.Fprint(w, "Page Not Found!")
+func NotFoundHandler(c *context.Context) {
+	c.Text(404, "Page Not Found")
 }
 
 func main() {

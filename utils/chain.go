@@ -3,6 +3,7 @@ package utils
 import (
 	"net/http"
 
+	"github.com/johanliu/Vidar/context"
 	"github.com/johanliu/Vidar/logger"
 )
 
@@ -12,12 +13,20 @@ type Chain struct {
 	rings []Ring
 }
 
+type ContextWrapperFunc func(*context.Context)
+
+// ServeHTTP calls f(w, r).
+func (f ContextWrapperFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	c := context.New(w, r)
+	f(c)
+}
+
 func New(ring ...Ring) Chain {
 	return Chain{append([]Ring{}, ring...)}
 }
 
-func (c *Chain) Wrap(h http.HandlerFunc) http.Handler {
-	return c.wrapInternal(http.HandlerFunc(h))
+func (c *Chain) Wrap(f ContextWrapperFunc) http.Handler {
+	return c.wrapInternal(ContextWrapperFunc(f))
 }
 
 func (c *Chain) wrapInternal(h http.Handler) http.Handler {
