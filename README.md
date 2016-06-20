@@ -28,8 +28,8 @@ func NotFoundHandler(c *Context) {
 }
 
 func main() {
-
 	commonHandler := utils.New(middlewares.LoggingHandler)
+	commonHandler.Append(middlewares.AuthHandler)
 	commonHandler.Append(middlewares.RecoverHandler)
 
 	v := vidar.New()
