@@ -35,8 +35,8 @@ func main() {
 
 	v := vidar.New()
 
-	v.Route.Add("GET", "/", commonHandler.Wrap(indexHandler))
-	v.Route.Add("POST", "/", commonHandler.Wrap(indexHandler))
+	v.Route.GET("/", commonHandler.Wrap(indexHandler))
+	v.Route.POST("/", commonHandler.Wrap(indexHandler))
 	v.Route.NotFound = commonHandler.Wrap(NotFoundHandler)
 
 	v.Run()
