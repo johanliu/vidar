@@ -10,15 +10,6 @@ type parsePlugins interface {
 
 const MaxMemory = 64 << 20 // 64MB
 
-/*
-POST  HTTP/1.1
-Host: localhost:8080?version=0.01
-Cache-Control: no-cache
-Content-Type: application/x-www-form-urlencoded
-
-firstname=yuan&lastname=liu
-*/
-
 func (ctx *Context) Query(key string, defaultvalues ...string) string {
 	value, ok := ctx.getQuery(key)
 	if !ok && len(defaultvalues) > 0 {
@@ -69,7 +60,6 @@ func (ctx *Context) File(key string) (multipart.File, error) {
 			return nil, err
 		}
 		return f, nil
-
 	}
 
 	return nil, errors.New("File not exists")
@@ -84,6 +74,11 @@ func (ctx *Context) getFile(key string) (*multipart.FileHeader, bool) {
 
 	return nil, false
 }
+
+/*
+func (ctx *Context) getRaw() interface{} {
+
+}*/
 
 func (param *Parameters) Params(key string) (string, bool) {
 	return param.getParams(key)
