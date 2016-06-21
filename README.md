@@ -16,17 +16,19 @@ import (
 
 func indexHandler(c *Context) {
     name := c.Form("name")
+
+    // default value getter
     // name := c.Form("name", "jay", "johan")
 
 	result := map[string]string{
 		"version" : "0.0.1",
-		"name" : "Vidar"
+		"name" : name
 	}
 
 	c.JSON(200, result)
 }
 
-func personHandler(c Context) {
+func personHandler(c *Context) {
     name := c.Params("name")
     c.Text("Hello %s", name)
 }
