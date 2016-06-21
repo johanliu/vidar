@@ -1,2 +1,8 @@
 [ERROR]: 2016/06/16 16:53:06 server.go:43: Server start failed: listen tcp 127.0.0.1:8080: bind: address already in use
 [ERROR]: 2016/06/20 20:17:55 vidar.go:31: Server start failed: listen tcp 127.0.0.1:8080: bind: address already in use
+[ERROR]: 2016/06/21 16:28:21 request.go:48: Parse HTTP Form failed
+[ERROR]: 2016/06/21 16:29:07 request.go:48: Parse HTTP Form failed: request Content-Type isn't multipart/form-data
+[ERROR]: 2016/06/21 16:44:57 request.go:48: Parse HTTP Form failed: request Content-Type isn't multipart/form-data
+[ERROR]: 2016/06/21 16:45:07 request.go:48: Parse HTTP Form failed: request Content-Type isn't multipart/form-data
+[ERROR]: 2016/06/21 16:46:15 request.go:52: Parse HTTP Form failed: request Content-Type isn't multipart/form-data
+[ERROR]: 2016/06/21 18:05:17 main.go:55: File read failed: File not exists

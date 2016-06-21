@@ -1,25 +1,85 @@
 package context
 
-import "github.com/johanliu/Vidar/logger"
+import (
+	"errors"
+	"mime/multipart"
+)
 
-func (ctx *Context) Form(key string, defaultvalues ...string) []string {
+type parsePlugins interface {
+}
+
+const MaxMemory = 64 << 20 // 64MB
+
+/*
+POST  HTTP/1.1
+Host: localhost:8080?version=0.01
+Cache-Control: no-cache
+Content-Type: application/x-www-form-urlencoded
+
+firstname=yuan&lastname=liu
+*/
+
+func (ctx *Context) Query(key string, defaultvalues ...string) string {
+	value, ok := ctx.getQuery(key)
+	if !ok && len(defaultvalues) > 0 {
+		return defaultvalues[0]
+	}
+	return value
+}
+
+func (ctx *Context) getQuery(key string) (string, bool) {
+	values, exists := ctx.Request.URL.Query()[key]
+
+	if exists && len(values) > 0 {
+		return values[0], true
+	}
+	return "", false
+}
+
+func (ctx *Context) Form(key string, defaultvalues ...string) string {
 	value, ok := ctx.getForm(key)
 	if !ok {
 		if len(defaultvalues) > 0 {
-			return defaultvalues
+			return defaultvalues[0]
 		}
 	}
 	return value
 }
 
-func (ctx *Context) getForm(key string) ([]string, bool) {
-	if err := ctx.Request.ParseForm(); err != nil {
-		logger.Error.Println("Parse HTTP Form failed")
+func (ctx *Context) getForm(key string) (string, bool) {
+	ctx.Request.ParseMultipartForm(MaxMemory)
+
+	values, exists := ctx.Request.PostForm[key]
+	if exists && len(values) > 0 {
+		return values[0], true
 	}
 
-	values, exists := ctx.Request.Form[key]
-	if exists {
-		return values, true
+	values, exists = ctx.Request.MultipartForm.Value[key]
+	if exists && len(values) > 0 {
+		return values[0], true
+	}
+
+	return "", false
+}
+
+func (ctx *Context) File(key string) (multipart.File, error) {
+	if fh, ok := ctx.getFile(key); ok {
+		f, err := fh.Open()
+		if err != nil {
+			return nil, err
+		}
+		return f, nil
+
+	}
+
+	return nil, errors.New("File not exists")
+}
+
+func (ctx *Context) getFile(key string) (*multipart.FileHeader, bool) {
+	ctx.Request.ParseMultipartForm(MaxMemory)
+
+	if files, exists := ctx.Request.MultipartForm.File[key]; exists {
+		return files[0], true
 	}
 
 	return nil, false
