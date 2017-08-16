@@ -1,31 +1,32 @@
-package context
+package vidar
 
 import (
 	"net/http"
 	"net/url"
 )
 
-type Parameters []parameter
+// type Parameters []parameter
 
-type parameter struct {
+type Parameters struct {
 	key   string
-	value string
+	value map[int]string
 }
 
 type Context struct {
+	Request *http.Request
 	Response
-	Parameters
-	Values    url.Values
-	Request   *http.Request
-	container map[string]interface{}
-	status    int
+	Parameters *Parameters
+	Values     url.Values
+	container  map[string]interface{}
+	status     int
 }
 
-func New(w http.ResponseWriter, r *http.Request) *Context {
+func NewContext(w http.ResponseWriter, r *http.Request) *Context {
+
 	return &Context{
-		Response:   Response{ResponseWriter: w},
 		Request:    r,
-		Parameters: []parameter{},
+		Response:   Response{ResponseWriter: w},
+		Parameters: &Parameters{key: "pathParam", value: r.Context().Value("abc").(map[int]string)},
 	}
 }
 

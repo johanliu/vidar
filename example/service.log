@@ -1,0 +1,7 @@
+[ERROR]: 2017/08/11 18:41:29 chain.go:25: []
+[ERROR]: 2017/08/11 18:43:54 chain.go:25: []
+[ERROR]: 2017/08/14 18:32:39 recover.go:14: panic: runtime error: invalid memory address or nil pointer dereference
+[ERROR]: 2017/08/14 18:33:09 recover.go:14: panic: runtime error: invalid memory address or nil pointer dereference
+[ERROR]: 2017/08/14 18:34:55 recover.go:14: panic: runtime error: invalid memory address or nil pointer dereference
+[ERROR]: 2017/08/14 18:36:46 recover.go:14: panic: runtime error: invalid memory address or nil pointer dereference
+[ERROR]: 2017/08/15 11:00:22 vidar.go:31: Server start failed: listen tcp 127.0.0.1:8080: bind: address already in use

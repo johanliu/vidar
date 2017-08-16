@@ -2,13 +2,12 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"io"
 
+	"github.com/grafana/grafana/pkg/cmd/grafana-cli/logger"
 	"github.com/johanliu/Vidar"
-	"github.com/johanliu/Vidar/context"
-	"github.com/johanliu/Vidar/logger"
 	"github.com/johanliu/Vidar/middlewares"
-	"github.com/johanliu/Vidar/utils"
 )
 
 /*
@@ -75,7 +74,6 @@ func fileHandler(c *context.Context) {
 	}
 	defer file.Close()
 
-	bytes.Buffer
 	io.Copy(&b, file)
 	c.Text(200, (&b).String())
 }

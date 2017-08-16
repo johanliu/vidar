@@ -1,12 +1,10 @@
-package logger
+package vidar
 
 import (
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
-
-	"github.com/johanliu/Vidar/config"
 )
 
 var (
@@ -20,7 +18,7 @@ func init() {
 	// TODO
 	path := "service.log"
 
-	file, err := os.OpenFile(config.Config.Log.Path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	file, err := os.OpenFile(Config.Log.Path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalln("Failed to open %s: %s", path, err)
 	}

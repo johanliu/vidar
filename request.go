@@ -1,4 +1,4 @@
-package context
+package vidar
 
 import (
 	"errors"
@@ -8,13 +8,23 @@ import (
 type parsePlugins interface {
 }
 
-const MaxMemory = 64 << 20 // 64MB
+const MaxMemory = 32 << 20 // 64MB
 
+func (ctx *Context) Method() string {
+	method := ctx.Request.Method
+
+	return method
+}
+
+// Query parameters which pick up k-v pairs from URI queries
+// for example: http://localhost:8080/index/department?users=alice
+// return {"users":"alice"}
 func (ctx *Context) Query(key string, defaultvalues ...string) string {
 	value, ok := ctx.getQuery(key)
 	if !ok && len(defaultvalues) > 0 {
 		return defaultvalues[0]
 	}
+
 	return value
 }
 
@@ -24,10 +34,33 @@ func (ctx *Context) getQuery(key string) (string, bool) {
 	if exists && len(values) > 0 {
 		return values[0], true
 	}
+
 	return "", false
 }
 
-func (ctx *Context) Form(key string, defaultvalues ...string) string {
+// Path parameters which pick up k-v pairs from URI pathes
+// for example: http://localhost:8080/index/department/users/alice
+// return {"users":"alice"}
+// It should be supported by users which defined router for query like
+// "/index/department/users/:users"
+func (ctx *Context) PathParam(key string, defaultValues ...string) string {
+	value, ok := ctx.getPathParam(key)
+	if !ok {
+		if len(defaultValues) > 0 {
+			return defaultValues[0]
+		}
+	}
+	return value
+}
+
+func (ctx *Context) getPathParam(key string) (string, bool) {
+	//TODO
+	return ctx.Parameters.value[2], true
+}
+
+// Form paramters which pick k-v pairs from "multipart/form-data" or
+// "application/x-www-form-urlencoded"
+func (ctx *Context) FormValue(key string, defaultvalues ...string) string {
 	value, ok := ctx.getForm(key)
 	if !ok {
 		if len(defaultvalues) > 0 {
@@ -73,23 +106,4 @@ func (ctx *Context) getFile(key string) (*multipart.FileHeader, bool) {
 	}
 
 	return nil, false
-}
-
-/*
-func (ctx *Context) getRaw() interface{} {
-
-}*/
-
-func (param *Parameters) Params(key string) (string, bool) {
-	return param.getParams(key)
-}
-
-func (params *Parameters) getParams(key string) (string, bool) {
-	for _, param := range *params {
-		if param.key == key {
-			return param.value, true
-		}
-	}
-
-	return "", false
 }

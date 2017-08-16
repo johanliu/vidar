@@ -1,9 +1,8 @@
 package middlewares
 
 import (
+	"fmt"
 	"net/http"
-
-	"github.com/johanliu/Vidar/logger"
 )
 
 func RecoverHandler(h http.Handler) http.Handler {
@@ -11,7 +10,7 @@ func RecoverHandler(h http.Handler) http.Handler {
 
 		defer func() {
 			if err := recover(); err != nil {
-				logger.Error.Printf("panic: %v", err)
+				fmt.Printf("panic: %v", err)
 				http.Error(w, http.StatusText(500), 500)
 			}
 		}()

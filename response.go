@@ -1,12 +1,10 @@
-package context
+package vidar
 
 import (
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-
-	"github.com/johanliu/Vidar/logger"
 )
 
 type Response struct {
@@ -21,7 +19,7 @@ func (ctx *Context) Write(data []byte) (int, error) {
 		ctx.Response.status = http.StatusOK
 	}
 
-	size, err := ctx.Response.ResponseWriter.Write(data)
+	size, err := ctx.ResponseWriter.Write(data)
 	ctx.Response.contentLength += size
 
 	return size, err
@@ -29,34 +27,34 @@ func (ctx *Context) Write(data []byte) (int, error) {
 
 func (ctx *Context) JSON(code int, body interface{}) {
 	if err := ctx.SetContentType("application/json; charset=utf-8"); err != nil {
-		logger.Error.Panicf("Set content type failed: %v", err)
+		fmt.Printf("Set content type failed: %v", err)
 	}
 
 	if err := ctx.SetStatus(code); err != nil {
-		logger.Error.Panicf("Set status code failed: %v", err)
+		fmt.Printf("Set status code failed: %v", err)
 	}
 
 	if err := json.NewEncoder(ctx.ResponseWriter).Encode(body); err != nil {
-		logger.Error.Panicf("Set payload failed: %v", err)
+		fmt.Printf("Set payload failed: %v", err)
 	}
 }
 
 func (ctx *Context) Text(code int, str string, params ...interface{}) {
 	if err := ctx.SetContentType("text/plain; charset=utf-8"); err != nil {
-		logger.Error.Panicf("Set content type failed: %v", err)
+		fmt.Printf("Set content type failed: %v", err)
 	}
 
 	if err := ctx.SetStatus(code); err != nil {
-		logger.Error.Panicf("Set status code failed: %v", err)
+		fmt.Printf("Set status code failed: %v", err)
 	}
 
 	if len(params) > 0 {
 		if _, err := fmt.Fprintf(ctx.ResponseWriter, str, params...); err != nil {
-			logger.Error.Panicf("Set payload failed: %v", err)
+			fmt.Printf("Set payload failed: %v", err)
 		}
 	} else {
 		if _, err := io.WriteString(ctx.ResponseWriter, str); err != nil {
-			logger.Error.Panicf("Set payload failed: %v", err)
+			fmt.Printf("Set payload failed: %v", err)
 		}
 	}
 }
