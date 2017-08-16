@@ -1,6 +1,9 @@
 package vidar
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 // MIME types
 const (
@@ -25,35 +28,48 @@ const (
 
 // HTTP methods
 const (
-	CONNECT = "CONNECT"
-	DELETE  = "DELETE"
-	GET     = "GET"
-	HEAD    = "HEAD"
-	OPTIONS = "OPTIONS"
-	PATCH   = "PATCH"
-	POST    = "POST"
-	PUT     = "PUT"
-	TRACE   = "TRACE"
+	GET    = "GET"
+	POST   = "POST"
+	PUT    = "PUT"
+	DELETE = "DELETE"
+	HEAD   = "HEAD"
+	PATCH  = "PATCH"
 )
 
 const (
 	charsetUTF8 = "charset=UTF-8"
 )
 
-type HTTPError struct {
-	Code    int
-	Message string
-}
-
 var (
-	// 4XX
-	NotFoundError  = NewHTTPError(http.StatusNotFound)
-	ForbiddenError = NewHTTPError(http.StatusForbidden)
+	BadRequestError           = NewHTTPError(http.StatusBadRequest)           //400
+	UnauthorizedError         = NewHTTPError(http.StatusUnauthorized)         //401
+	ForbiddenError            = NewHTTPError(http.StatusForbidden)            //403
+	NotFoundError             = NewHTTPError(http.StatusNotFound)             //404
+	MethodNotAllowedError     = NewHTTPError(http.StatusMethodNotAllowed)     //405
+	UnsupportedMediaTypeError = NewHTTPError(http.StatusUnsupportedMediaType) //415
+	ConflictError             = NewHTTPError(http.StatusConflict)             //409
 
-	// 5XX
-	InternalServerError = NewHTTPError(http.StatusInternalServerError)
+	InternalServerError = NewHTTPError(http.StatusInternalServerError) //500
+	NotImplementedError = NewHTTPError(http.StatusNotImplemented)      //501
 )
 
-func NewHTTPError(code int) *HTTPError {
-	return &HTTPError{Code: code, Message: http.StatusText(code)}
+type HTTPError struct {
+	Code    int
+	Content string
+}
+
+func NewHTTPError(code int, message ...string) *HTTPError {
+	var content string
+
+	if len(message) > 0 {
+		content = message[0]
+	} else {
+		content = http.StatusText(code)
+	}
+
+	return &HTTPError{Code: code, Content: content}
+}
+
+func (he *HTTPError) Error() {
+	fmt.Sprintf("code=%d, message=%v", he.Code, he.Content)
 }
