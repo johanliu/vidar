@@ -1,38 +1,103 @@
 package vidar
 
 import (
-	"io"
-	"io/ioutil"
+	"fmt"
 	"log"
 	"os"
+	"sync"
 )
 
-var (
-	Debug   *log.Logger
-	Info    *log.Logger
-	Warning *log.Logger
-	Error   *log.Logger
+const (
+	DefaultLevel  = LevelInfo
+	DefaultOutput = os.Stdout
+	DefaultFlag   = log.Ldate | log.Ltime | log.Lshortfile
 )
 
-func init() {
-	// TODO
-	path := "service.log"
+const (
+	LevelError = itoa
+	LevelWarning
+	LevelInfo
+	LevelDebug
+)
 
-	file, err := os.OpenFile(Config.Log.Path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalln("Failed to open %s: %s", path, err)
+var levelName = map[string]int{
+	"Error":   LevelError,
+	"Warning": LevelWarning,
+	"Info":    LevelInfo,
+	"Debug":   LevelDebug,
+}
+
+type Logger struct {
+	level int
+	err   *log.Logger
+	war   *log.Logger
+	inf   *log.Logger
+	deb   *log.Logger
+}
+
+func (l *Logger) Error(format string, v ...interface{}) {
+	if LevelError > log.level {
+		return
 	}
 
-	debugOutput := ioutil.Discard
-	infoOutput := os.Stdout
-	warningOutput := os.Stdout
-	errorOutput := io.MultiWriter(file, os.Stderr)
+	l.err.Output(3, fmt.Sprintf(format, v...))
+}
 
-	Debug = log.New(debugOutput, "[TRACE]: ", log.Ldate|log.Ltime|log.Lshortfile)
+func (l *Logger) Warning(format string, v ...interface{}) {
+	if LevelWarning > log.level {
+		return
+	}
 
-	Info = log.New(infoOutput, "[INFO]: ", log.Ldate|log.Ltime|log.Lshortfile)
+	l.war.Output(3, fmt.Sprintf(format, v...))
+}
 
-	Warning = log.New(warningOutput, "[INFO]: ", log.Ldate|log.Ltime|log.Lshortfile)
+func (l *Logger) Info(format string, v ...interface{}) {
+	if LevelInfo > log.level {
+		return
+	}
 
-	Error = log.New(errorOutput, "[ERROR]: ", log.Ldate|log.Ltime|log.Lshortfile)
+	l.logger.SetPrefix("[INFO]: ")
+	l.inf.Output(3, fmt.Sprintf(format, v...))
+}
+
+func (l *Logger) Debug(format string, v ...interface{}) {
+	if LevelDebug > log.level {
+		return
+	}
+
+	l.logger.SetPrefix("[DEBUG]: ")
+	l.deb.Output(3, fmt.Sprintf(format, v...))
+}
+
+var mutex = new(sync.RWMutex)
+
+func (l *Logger) SetLevel(level int) {
+	mutex.Lock()
+	defer mutex.Unlock()
+	l.level = level
+}
+
+func (l *Logger) SetLevelByName(level string) {
+	mutex.Lock()
+	defer mutex.Unlock()
+	l.level = levelName[level]
+}
+
+func (l *Logger) Level() int {
+	mutex.RLock()
+	defer mutex.RUnlock()
+	return l.level
+}
+
+func NewLogger() *Logger {
+	l := &Logger{
+		level: DefaultLevel,
+	}
+
+	l.err = log.New(DefaultOutput, "[ERROR]: ", DefaultFlag)
+	l.war = log.New(DefaultOutput, "[WARNING]: ", DefaultFlag)
+	l.inf = log.New(DefaultOutput, "[INFO]: ", DefaultFlag)
+	l.deb = log.New(DefaultOutput, "[DEBUG]: ", DefaultFlag)
+
+	return l
 }
