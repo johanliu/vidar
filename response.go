@@ -22,23 +22,16 @@ func (res *Response) Write(data []byte) (int, error) {
 	return size, err
 }
 
-func (res *Response) SetContentType(value string) error {
-	return res.SetHeader("Content-Type", value)
-}
-
-func (res *Response) SetStatus(code int) error {
+func (res *Response) SetStatus(code int) {
 	res.ResponseWriter.WriteHeader(code)
-	return nil
 }
 
-func (res *Response) SetHeader(key string, value string) error {
-	if len(value) == 0 {
-		res.ResponseWriter.Header().Del(key)
-	} else {
-		res.ResponseWriter.Header().Set(key, value)
-	}
+func (res *Response) SetHeader(key string, value string) {
+	res.ResponseWriter.Header().Set(key, value)
+}
 
-	return nil
+func (res *Response) RemoveHeader(key string) {
+	res.ResponseWriter.Header().Del(key)
 }
 
 func (res *Response) Size() (int, error) {

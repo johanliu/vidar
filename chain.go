@@ -28,7 +28,7 @@ func (c *Chain) Use(f ContextUserFunc) http.Handler {
 
 func (c *Chain) useInternal(h http.Handler) http.Handler {
 	if h == nil {
-		Error.Println("Handler can not be nil to be wrapped")
+		log.Error("Handler can not be nil to be wrapped")
 	}
 
 	for i := range c.rings {
@@ -39,7 +39,7 @@ func (c *Chain) useInternal(h http.Handler) http.Handler {
 
 func (c *Chain) Append(ring Ring) {
 	if ring == nil {
-		Error.Println("nil Handler can not be appended ")
+		log.Error("nil Handler can not be appended ")
 	}
 
 	c.rings = append(c.rings, ring)

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/johanliu/Vidar/constant"
 )
 
 type Router struct {
@@ -47,7 +49,7 @@ func (r *Router) pathParamSplit(path string) map[int]string {
 		}
 	}
 
-	fmt.Println(container)
+	// fmt.Println(container)
 
 	return container
 }
@@ -56,14 +58,12 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if eds, ok := r.handlers[req.URL.Path]; ok {
 		for _, ed := range eds {
 
-			fmt.Println("helloworld")
 			if ed.method == req.Method {
-
 				abc := make(map[int]string)
 				abc[2] = "a"
 
 				ctx := context.WithValue(req.Context(), "abc", abc)
-				fmt.Println(ctx)
+				// fmt.Println(ctx)
 
 				ed.Handler.ServeHTTP(w, req.WithContext(ctx))
 				return
@@ -87,21 +87,21 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *Router) GET(path string, h http.Handler) {
-	r.Add(GET, path, h)
+	r.Add(constant.GET, path, h)
 }
 
 func (r *Router) POST(path string, h http.Handler) {
-	r.Add(POST, path, h)
+	r.Add(constant.POST, path, h)
 }
 
 func (r *Router) DELETE(path string, h http.Handler) {
-	r.Add(DELETE, path, h)
+	r.Add(constant.DELETE, path, h)
 }
 
 func (r *Router) PUT(path string, h http.Handler) {
-	r.Add(PUT, path, h)
+	r.Add(constant.PUT, path, h)
 }
 
 func (r *Router) PATCH(path string, h http.Handler) {
-	r.Add(PATCH, path, h)
+	r.Add(constant.PATCH, path, h)
 }

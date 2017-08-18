@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/johanliu/mlog"
 )
 
 type Vidar struct {
@@ -19,6 +21,8 @@ type vidarListener struct {
 	*net.TCPListener
 }
 
+var log = mlog.NewLogger()
+
 func New() (v *Vidar) {
 	v = &Vidar{
 		Router: NewRouter(),
@@ -26,6 +30,7 @@ func New() (v *Vidar) {
 	}
 
 	v.Server.Handler = v.Router
+	log.SetLevelByName("INFO")
 
 	return
 }
@@ -34,13 +39,13 @@ func New() (v *Vidar) {
 func (v *Vidar) Run() (err error) {
 	v.Server.Addr, err = resolveAddress()
 	if err != nil {
-		fmt.Printf("Resolve address failed: %v\n", err)
+		log.Error("Resolve address failed: %v\n", err)
 	}
 
-	fmt.Printf("Running on %s", v.Server.Addr)
+	log.Info("Running on %s", v.Server.Addr)
 
 	if err := v.StartServer(v.Server); err != nil {
-		fmt.Printf("Server start failed: %v", err)
+		log.Error("Server start failed: %v", err)
 	}
 
 	return nil
@@ -78,10 +83,10 @@ func resolveAddress(addr ...string) (string, error) {
 	switch len(addr) {
 	case 0:
 		if host := Config.Server.Host; len(host) > 0 {
-			fmt.Printf("Read host value from config file: %s\n", host)
+			log.Info("Read host value from config file: %s\n", host)
 
 			if port := Config.Server.Port; len(port) > 0 {
-				fmt.Printf("Read port value from config file: %s\n", port)
+				log.Info("Read port value from config file: %s\n", port)
 
 				return host + ":" + port, nil
 			}
@@ -92,6 +97,6 @@ func resolveAddress(addr ...string) (string, error) {
 		fmt.Printf("The number of parameters should be given as 0 or 2, but %s is given\n", len(addr))
 	}
 
-	fmt.Println("Use defalt address: localhost:8080")
+	log.Info("Use defalt address: localhost:8080")
 	return "localhost:8080", nil
 }

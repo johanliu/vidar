@@ -1,4 +1,4 @@
-package vidar
+package constant
 
 import (
 	"fmt"
@@ -24,6 +24,36 @@ const (
 	MIMETextPlainCharsetUTF8             = MIMETextPlain + "; " + charsetUTF8
 	MIMEMultipartForm                    = "multipart/form-data"
 	MIMEOctetStream                      = "application/octet-stream"
+)
+
+// Header
+const (
+	HeaderAccept              = "Accept"
+	HeaderAcceptEncoding      = "Accept-Encoding"
+	HeaderAllow               = "Allow"
+	HeaderAuthorization       = "Authorization"
+	HeaderContentDisposition  = "Content-Disposition"
+	HeaderContentEncoding     = "Content-Encoding"
+	HeaderContentLength       = "Content-Length"
+	HeaderContentType         = "Content-Type"
+	HeaderCookie              = "Cookie"
+	HeaderSetCookie           = "Set-Cookie"
+	HeaderIfModifiedSince     = "If-Modified-Since"
+	HeaderLastModified        = "Last-Modified"
+	HeaderLocation            = "Location"
+	HeaderUpgrade             = "Upgrade"
+	HeaderVary                = "Vary"
+	HeaderWWWAuthenticate     = "WWW-Authenticate"
+	HeaderXForwardedFor       = "X-Forwarded-For"
+	HeaderXForwardedProto     = "X-Forwarded-Proto"
+	HeaderXForwardedProtocol  = "X-Forwarded-Protocol"
+	HeaderXForwardedSsl       = "X-Forwarded-Ssl"
+	HeaderXUrlScheme          = "X-Url-Scheme"
+	HeaderXHTTPMethodOverride = "X-HTTP-Method-Override"
+	HeaderXRealIP             = "X-Real-IP"
+	HeaderXRequestID          = "X-Request-ID"
+	HeaderServer              = "Server"
+	HeaderOrigin              = "Origin"
 )
 
 // HTTP methods
@@ -70,6 +100,6 @@ func NewHTTPError(code int, message ...string) *HTTPError {
 	return &HTTPError{Code: code, Content: content}
 }
 
-func (he *HTTPError) Error() {
-	fmt.Sprintf("code=%d, message=%v", he.Code, he.Content)
+func (he *HTTPError) Error() string {
+	return fmt.Sprintf("code=%d, message=%v", he.Code, he.Content)
 }
