@@ -9,6 +9,12 @@ import (
 	"github.com/johanliu/Vidar/constant"
 )
 
+type Node struct {
+}
+
+type Tree struct {
+}
+
 type Router struct {
 	handlers map[string][]*Endpoint
 	NotFound http.Handler

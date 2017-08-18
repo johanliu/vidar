@@ -83,11 +83,7 @@ func resolveAddress(addr ...string) (string, error) {
 	switch len(addr) {
 	case 0:
 		if host := Config.Server.Host; len(host) > 0 {
-			log.Info("Read host value from config file: %s\n", host)
-
 			if port := Config.Server.Port; len(port) > 0 {
-				log.Info("Read port value from config file: %s\n", port)
-
 				return host + ":" + port, nil
 			}
 		}

@@ -68,6 +68,7 @@ func (ctx *Context) QueryParam(key string, defaultvalues ...string) string {
 	if exists && len(values) > 0 {
 		return values[0]
 	} else {
+		//TODO: index out of range
 		return defaultvalues[0]
 	}
 }
@@ -150,6 +151,15 @@ func (ctx *Context) Redirect(code int, url string) {
 	ctx.response.SetStatus(code)
 }
 
+func (ctx *Context) XML(code int, body interface{}) {
+	ctx.response.SetHeader(constant.HeaderContentType, constant.MIMEApplicationXMLCharsetUTF8)
+	ctx.response.SetStatus(code)
+
+	if err := json.NewEncoder(ctx.response.ResponseWriter).Encode(body); err != nil {
+		log.Error("Set payload failed: %v", err)
+	}
+}
+
 func (ctx *Context) JSON(code int, body interface{}) {
 	ctx.response.SetHeader(constant.HeaderContentType, constant.MIMEApplicationJSONCharsetUTF8)
 	ctx.response.SetStatus(code)
@@ -169,5 +179,11 @@ func (ctx *Context) Text(code int, str string, params ...interface{}) {
 }
 
 func (ctx *Context) HTML(code int, str string, params ...interface{}) {
-	fmt.Fprintf(ctx.response.ResponseWriter, str, params...)
+	ctx.response.SetHeader(constant.HeaderContentType, constant.MIMETextHTMLCharsetUTF8)
+	ctx.response.SetStatus(code)
+
+	if _, err := fmt.Fprintf(ctx.response.ResponseWriter, str, params...); err != nil {
+		log.Error("Set payload failed: %v", err)
+	}
+
 }

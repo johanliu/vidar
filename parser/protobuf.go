@@ -3,6 +3,7 @@ package parser
 import (
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/johanliu/Vidar/constant"
@@ -15,6 +16,9 @@ func (pp *ProtobufParser) PluginName() string {
 }
 
 func (pp *ProtobufParser) Parse(obj interface{}, req *http.Request) error {
+	if !strings.HasPrefix(req.Header.Get(constant.HeaderContentType), constant.MIMEApplicationProtobuf) {
+		return constant.UnsupportedMediaTypeError
+	}
 
 	buf, err := ioutil.ReadAll(req.Body)
 	if err != nil {

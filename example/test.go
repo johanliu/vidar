@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/johanliu/Vidar"
 	"github.com/johanliu/Vidar/middlewares"
 	"github.com/johanliu/mlog"
@@ -17,18 +15,26 @@ type response struct {
 
 func indexHandler(c *vidar.Context) {
 	if c.Method() == "GET" {
-		version := c.QueryParam("version")
+		// version := c.QueryParam("version", "123")
 
-		result := map[string]string{
-			"message": "hello " + version,
-		}
-		c.JSON(202, result)
+		result := `
+		<html>
+		<header>This is header</header>
+		<body>This is body</body>
+		</html>
+		`
+
+		c.HTML(202, result)
 	}
 
 	if c.Method() == "POST" {
 		name := c.FormParam("name")
 		value := c.FormParam("value")
-		c.Text(200, name+value)
+
+		result := map[string]string{
+			"message": "hello " + name + value,
+		}
+		c.JSON(200, result)
 	}
 }
 
@@ -36,12 +42,11 @@ func jsonHandler(c *vidar.Context) {
 	res := new(response)
 
 	jp := c.NewParser("JSON")
-
 	if err := jp.Parse(res, c.Request); err != nil {
-		log.Info(err.Error())
 		c.Text(415, "Parser Error")
 	} else {
-		c.Text(200, fmt.Sprintf("name: %s, age: %d", res.Name, res.Age))
+		//c.XML(200, res)
+		c.JSON(200, res)
 	}
 }
 
@@ -55,7 +60,6 @@ func notFoundHandler(c *vidar.Context) {
 }
 
 func main() {
-
 	// Common utils handler for all path defined below
 	commonHandler := vidar.NewChain()
 
@@ -65,10 +69,10 @@ func main() {
 	v := vidar.New()
 
 	// Handlers
-	v.Router.Add("GET", "/main", commonHandler.Use(indexHandler))
-	v.Router.Add("POST", "/main", commonHandler.Use(indexHandler))
+	v.Router.Add("GET", "/", commonHandler.Use(indexHandler))
+	v.Router.Add("POST", "/", commonHandler.Use(indexHandler))
 	v.Router.POST("/json", commonHandler.Use(jsonHandler))
-	v.Router.Add("GET", "/users/:id", commonHandler.Use(indexHandler))
+	v.Router.Add("GET", "/users/:id", commonHandler.Use(userHandler))
 	v.Router.NotFound = commonHandler.Use(notFoundHandler)
 
 	v.Run()
