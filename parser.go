@@ -16,6 +16,12 @@ func (ctx *Context) NewParser(name string) ParserPlugins {
 	switch name {
 	case "JSON":
 		return new(parser.JSONParser)
+	case "XML":
+		return new(parser.XMLParser)
+	case "Protobuf":
+		return new(parser.ProtobufParser)
+	case "Msgpack":
+		return new(parser.MsgpackParser)
 	default:
 		return new(DefaultParser)
 	}

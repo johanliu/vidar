@@ -11,8 +11,8 @@ import (
 var log = mlog.NewLogger()
 
 type response struct {
-	name string `json:"name"`
-	age  int    `json:"int"`
+	Name string `json:"name"`
+	Age  int    `json:"age"`
 }
 
 func indexHandler(c *vidar.Context) {
@@ -41,7 +41,7 @@ func jsonHandler(c *vidar.Context) {
 		log.Info(err.Error())
 		c.Text(415, "Parser Error")
 	} else {
-		c.Text(200, fmt.Sprintf("name: %s, age: %d", res.name, res.age))
+		c.Text(200, fmt.Sprintf("name: %s, age: %d", res.Name, res.Age))
 	}
 }
 

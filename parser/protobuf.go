@@ -10,11 +10,11 @@ import (
 
 type ProtobufParser struct{}
 
-func (jp *ProtobufParser) PluginName() string {
+func (pp *ProtobufParser) PluginName() string {
 	return "JSONParser"
 }
 
-func (jp *ProtobufParser) Parse(obj interface{}, req *http.Request) error {
+func (pp *ProtobufParser) Parse(obj interface{}, req *http.Request) error {
 
 	buf, err := ioutil.ReadAll(req.Body)
 	if err != nil {
