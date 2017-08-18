@@ -11,8 +11,8 @@ import (
 var log = mlog.NewLogger()
 
 type response struct {
-	name string `json:name`
-	age  int    `json:int`
+	name string `json:"name"`
+	age  int    `json:"int"`
 }
 
 func indexHandler(c *vidar.Context) {
