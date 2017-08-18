@@ -8,49 +8,75 @@ A lightweight Golang web framework
 package main
 
 import (
-    "github.com/johanliu/Vidar"
-    "github.com/johanliu/Vidar/context"
-    "github.com/johanliu/Vidar/middlewares"
-    "github.com/johanliu/Vidar/utils"
+	"github.com/johanliu/Vidar"
+	"github.com/johanliu/Vidar/middlewares"
+	"github.com/johanliu/mlog"
 )
 
-func indexHandler(c *Context) {
-    name := c.Form("name")
+var log = mlog.NewLogger()
 
-    // default value getter
-    // name := c.Form("name", "jay", "johan")
+type response struct {
+	Name string `json:"name"`
+	Age  int    `json:"age"`
+}
 
-	result := map[string]string{
-		"version" : "0.0.1",
-		"name" : name
+func indexHandler(c *vidar.Context) {
+	if c.Method() == "GET" {
+		version := c.QueryParam("version")
+
+		result := map[string]string{
+			"message": "hello " + version,
+		}
+		c.JSON(202, result)
 	}
 
-	c.JSON(200, result)
+	if c.Method() == "POST" {
+		name := c.FormParam("name")
+		value := c.FormParam("value")
+		c.Text(200, name+value)
+	}
 }
 
-func personHandler(c *Context) {
-    name := c.Params("name")
-    c.Text("Hello %s", name)
+func jsonHandler(c *vidar.Context) {
+	res := new(response)
+
+	jp := c.NewParser("JSON")
+	if err := jp.Parse(res, c.Request); err != nil {
+		log.Info(err.Error())
+		c.Text(415, "Parser Error")
+	} else {
+		c.XML(200, res)
+		//c.JSON(200, res)
+	}
 }
 
-func NotFoundHandler(c *Context) {
-	c.Text(404, "Page Not Found!")
+func userHandler(c *vidar.Context) {
+	id := c.PathParam("id")
+	c.Text(200, id)
+}
+
+func notFoundHandler(c *vidar.Context) {
+	c.Text(404, "Page Not Found")
 }
 
 func main() {
-	commonHandler := utils.New(middlewares.LoggingHandler)
-	commonHandler.Append(middlewares.AuthHandler)
+	// Common utils handler for all path defined below
+	commonHandler := vidar.NewChain()
+
+	commonHandler.Append(middlewares.LoggingHandler)
 	commonHandler.Append(middlewares.RecoverHandler)
 
 	v := vidar.New()
 
-	v.Route.GET("/", commonHandler.Wrap(indexHandler))
-	v.Route.POST("/person/:name", commonHandler.Wrap(personHandler))
-	v.Route.NotFound = commonHandler.Wrap(NotFoundHandler)
+	// Handlers
+	v.Router.Add("GET", "/main", commonHandler.Use(indexHandler))
+	v.Router.Add("POST", "/main", commonHandler.Use(indexHandler))
+	v.Router.POST("/json", commonHandler.Use(jsonHandler))
+	v.Router.Add("GET", "/users/:id", commonHandler.Use(indexHandler))
+	v.Router.NotFound = commonHandler.Use(notFoundHandler)
 
 	v.Run()
 }
-
 ~~~
 
 
