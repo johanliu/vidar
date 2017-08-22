@@ -14,6 +14,7 @@ type Vidar struct {
 	Router   *Router
 	Server   *http.Server
 	Listener net.Listener
+	Chain    []Chain
 	address  string
 }
 
@@ -39,13 +40,13 @@ func New() (v *Vidar) {
 func (v *Vidar) Run() (err error) {
 	v.Server.Addr, err = resolveAddress()
 	if err != nil {
-		log.Error("Resolve address failed: %v\n", err)
+		log.Error(err)
 	}
 
 	log.Info("Running on %s", v.Server.Addr)
 
 	if err := v.StartServer(v.Server); err != nil {
-		log.Error("Server start failed: %v", err)
+		log.Error(err)
 	}
 
 	return nil

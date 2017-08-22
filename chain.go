@@ -1,6 +1,7 @@
 package vidar
 
 import (
+	"errors"
 	"net/http"
 )
 
@@ -11,6 +12,8 @@ type Chain struct {
 }
 
 type ContextUserFunc func(*Context)
+
+var errNilHandler = errors.New("handler: nil handler can't be used")
 
 // ServeHTTP calls f(w, r).
 func (f ContextUserFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -28,7 +31,7 @@ func (c *Chain) Use(f ContextUserFunc) http.Handler {
 
 func (c *Chain) useInternal(h http.Handler) http.Handler {
 	if h == nil {
-		log.Error("Handler can not be nil to be wrapped")
+		log.Error(errNilHandler)
 	}
 
 	for i := range c.rings {
@@ -39,7 +42,7 @@ func (c *Chain) useInternal(h http.Handler) http.Handler {
 
 func (c *Chain) Append(ring Ring) {
 	if ring == nil {
-		log.Error("nil Handler can not be appended ")
+		log.Error(errNilHandler)
 	}
 
 	c.rings = append(c.rings, ring)

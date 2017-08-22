@@ -30,7 +30,11 @@ func (res *Response) SetHeader(key string, value string) {
 	res.ResponseWriter.Header().Set(key, value)
 }
 
-func (res *Response) RemoveHeader(key string) {
+func (res *Response) AddHeader(key string, value string) {
+	res.ResponseWriter.Header().Add(key, value)
+}
+
+func (res *Response) DelHeader(key string) {
 	res.ResponseWriter.Header().Del(key)
 }
 

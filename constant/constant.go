@@ -1,11 +1,16 @@
 package constant
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 )
 
 // MIME types
+const (
+	charsetUTF8 = "charset=UTF-8"
+)
+
 const (
 	MIMEApplicationJSON                  = "application/json"
 	MIMEApplicationJSONCharsetUTF8       = MIMEApplicationJSON + "; " + charsetUTF8
@@ -66,10 +71,7 @@ const (
 	PATCH  = "PATCH"
 )
 
-const (
-	charsetUTF8 = "charset=UTF-8"
-)
-
+// Errors
 var (
 	BadRequestError           = NewHTTPError(http.StatusBadRequest)           //400
 	UnauthorizedError         = NewHTTPError(http.StatusUnauthorized)         //401
@@ -81,6 +83,10 @@ var (
 
 	InternalServerError = NewHTTPError(http.StatusInternalServerError) //500
 	NotImplementedError = NewHTTPError(http.StatusNotImplemented)      //501
+)
+
+var (
+	TodoError = errors.New("Todo Error")
 )
 
 type HTTPError struct {

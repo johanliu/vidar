@@ -26,17 +26,17 @@ var Config tomlConfig
 func init() {
 	f, err := os.Open(configFile)
 	if err != nil {
-		log.Error("Failed to open config file: %s", err)
+		log.Error(err)
 	}
 
 	defer f.Close()
 
 	buf, err := ioutil.ReadAll(f)
 	if err != nil {
-		log.Error("Failed to read config file: %s", err)
+		log.Error(err)
 	}
 
 	if err := toml.Unmarshal(buf, &Config); err != nil {
-		log.Error("Failed to unmarshal config file: %s", err)
+		log.Error(err)
 	}
 }

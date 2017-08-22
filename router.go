@@ -76,8 +76,7 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			}
 		}
 
-		fmt.Printf("%s:%s Method Not Allowed", req.Method, req.URL.Path)
-		http.Error(w, "Method Not Allowed", 405)
+		log.Error(constant.MethodNotAllowedError)
 
 	} else {
 

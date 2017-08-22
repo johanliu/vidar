@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/johanliu/Vidar"
+	"github.com/johanliu/Vidar/constant"
 	"github.com/johanliu/Vidar/middlewares"
 	"github.com/johanliu/mlog"
 )
@@ -28,13 +29,17 @@ func indexHandler(c *vidar.Context) {
 	}
 
 	if c.Method() == "POST" {
-		name := c.FormParam("name")
-		value := c.FormParam("value")
+		/*
+			name := c.FormParam("name")
+			value := c.FormParam("value")
 
-		result := map[string]string{
-			"message": "hello " + name + value,
-		}
-		c.JSON(200, result)
+			result := map[string]string{
+				"message": "hello " + name + value,
+			}
+			c.JSON(200, result)
+		*/
+		body := c.Body()
+		c.Text(200, string(body[:]))
 	}
 }
 
@@ -43,9 +48,8 @@ func jsonHandler(c *vidar.Context) {
 
 	jp := c.NewParser("JSON")
 	if err := jp.Parse(res, c.Request); err != nil {
-		c.Text(415, "Parser Error")
+		c.Error(constant.BadRequestError)
 	} else {
-		//c.XML(200, res)
 		c.JSON(200, res)
 	}
 }
@@ -56,11 +60,10 @@ func userHandler(c *vidar.Context) {
 }
 
 func notFoundHandler(c *vidar.Context) {
-	c.Text(404, "Page Not Found")
+	c.Error(constant.NotFoundError)
 }
 
 func main() {
-	// Common utils handler for all path defined below
 	commonHandler := vidar.NewChain()
 
 	commonHandler.Append(middlewares.LoggingHandler)
@@ -68,7 +71,6 @@ func main() {
 
 	v := vidar.New()
 
-	// Handlers
 	v.Router.Add("GET", "/", commonHandler.Use(indexHandler))
 	v.Router.Add("POST", "/", commonHandler.Use(indexHandler))
 	v.Router.POST("/json", commonHandler.Use(jsonHandler))

@@ -2,10 +2,14 @@ package vidar
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"mime/multipart"
+	"net"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/johanliu/Vidar/constant"
 )
@@ -58,6 +62,44 @@ func (ctx *Context) Get(key string) (interface{}, bool) {
 }
 
 // Request
+
+func (ctx *Context) Method() string {
+	return ctx.Request.Method
+}
+
+func (ctx *Context) ContentType() string {
+	return ctx.Request.Header.Get(constant.HeaderContentType)
+}
+
+func (ctx *Context) Body() []byte {
+	body, err := ioutil.ReadAll(ctx.Request.Body)
+	if err != nil {
+		log.Error(err)
+	}
+
+	return body
+}
+
+func (ctx *Context) RealIP() string {
+	if ip := ctx.Request.Header.Get(constant.HeaderXForwardedFor); ip != "" {
+		return strings.Split(ip, ",")[0]
+	} else if ip := ctx.Request.Header.Get(constant.HeaderXRealIP); ip != "" {
+		return ip
+	}
+
+	host, _, err := net.SplitHostPort(ctx.Request.RemoteAddr)
+	if err != nil {
+		log.Error(err)
+	}
+	return host
+}
+
+func (ctx *Context) Scheme() string {
+	if ctx.Request.TLS != nil {
+		return "HTTPS"
+	}
+	return "HTTP"
+}
 
 // Query parameters which pick up k-v pairs from URI queries
 // for example: http://localhost:8080/index/department?users=alice
@@ -114,12 +156,12 @@ func (ctx *Context) FormParams() (url.Values, error) {
 	return ctx.Request.Form, nil
 }
 
-func (ctx *Context) ContentType() string {
-	return ctx.Request.Header.Get("Content-Type")
+func (ctx *Context) Cookie(name string) (*http.Cookie, error) {
+	return ctx.Request.Cookie(name)
 }
 
-func (ctx *Context) Host() string {
-	return ctx.Request.Header.Get("Host")
+func (ctx *Context) Cookies() []*http.Cookie {
+	return ctx.Request.Cookies()
 }
 
 // fn.Open()
@@ -136,19 +178,40 @@ func (ctx *Context) SetPath(path string) {
 	ctx.path = path
 }
 
-func (ctx *Context) Method() string {
-	return ctx.Request.Method
-}
-
 //Response
+func (ctx *Context) Error(err error) {
+	code := constant.InternalServerError.Code
+	content := constant.InternalServerError.Content
+
+	if herr, ok := err.(*constant.HTTPError); ok {
+		code = herr.Code
+		content = herr.Content
+	}
+
+	ctx.response.SetHeader(constant.HeaderContentType, constant.MIMETextPlainCharsetUTF8)
+	ctx.response.SetStatus(code)
+	fmt.Fprintf(ctx.response.ResponseWriter, content)
+}
 
 func (ctx *Context) Redirect(code int, url string) {
 	if code < 300 || code > 308 {
-		log.Error("InvalidRedirectError")
+		log.Error(errors.New("InvalidRedirectError"))
 	}
 
 	ctx.response.SetHeader(constant.HeaderLocation, url)
 	ctx.response.SetStatus(code)
+
+	// No 3xx body on POST and PUT
+	if ctx.Method() == "GET" {
+		note := "<a href=\"" + url + "\">Redirect</a>.\n"
+		fmt.Fprintln(ctx.response.ResponseWriter, note)
+	}
+}
+
+func (ctx *Context) SetCookie(cookie *http.Cookie) {
+	if v := cookie.String(); v != "" {
+		ctx.response.AddHeader(constant.HeaderSetCookie, v)
+	}
 }
 
 func (ctx *Context) XML(code int, body interface{}) {
@@ -156,7 +219,7 @@ func (ctx *Context) XML(code int, body interface{}) {
 	ctx.response.SetStatus(code)
 
 	if err := json.NewEncoder(ctx.response.ResponseWriter).Encode(body); err != nil {
-		log.Error("Set payload failed: %v", err)
+		log.Error(err)
 	}
 }
 
@@ -165,7 +228,7 @@ func (ctx *Context) JSON(code int, body interface{}) {
 	ctx.response.SetStatus(code)
 
 	if err := json.NewEncoder(ctx.response.ResponseWriter).Encode(body); err != nil {
-		log.Error("Set payload failed: %v", err)
+		log.Error(err)
 	}
 }
 
@@ -174,7 +237,7 @@ func (ctx *Context) Text(code int, str string, params ...interface{}) {
 	ctx.response.SetStatus(code)
 
 	if _, err := fmt.Fprintf(ctx.response.ResponseWriter, str, params...); err != nil {
-		log.Error("Set payload failed: %v", err)
+		log.Error(err)
 	}
 }
 
@@ -183,7 +246,6 @@ func (ctx *Context) HTML(code int, str string, params ...interface{}) {
 	ctx.response.SetStatus(code)
 
 	if _, err := fmt.Fprintf(ctx.response.ResponseWriter, str, params...); err != nil {
-		log.Error("Set payload failed: %v", err)
+		log.Error(err)
 	}
-
 }
