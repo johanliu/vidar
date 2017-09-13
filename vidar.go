@@ -1,7 +1,6 @@
 package vidar
 
 import (
-	"fmt"
 	"net"
 	"net/http"
 	"strings"
@@ -52,6 +51,7 @@ func (v *Vidar) Run() (err error) {
 	return nil
 }
 
+// TODO: should be used by unix domain socket as well
 func (v *Vidar) StartServer(s *http.Server) (err error) {
 	v.Listener, err = newListener("tcp", v.Server.Addr)
 	if err != nil {
@@ -83,15 +83,15 @@ func newListener(proto string, address string) (*vidarListener, error) {
 func resolveAddress(addr ...string) (string, error) {
 	switch len(addr) {
 	case 0:
-		if host := Config.Server.Host; len(host) > 0 {
-			if port := Config.Server.Port; len(port) > 0 {
+		if host := tc.Server.Host; len(host) > 0 {
+			if port := tc.Server.Port; len(port) > 0 {
 				return host + ":" + port, nil
 			}
 		}
 	case 2:
 		return strings.Join(addr, ":"), nil
 	default:
-		fmt.Printf("The number of parameters should be given as 0 or 2, but %s is given\n", len(addr))
+		log.Info("The number of parameters should be given as 0 or 2, but %s is given\n", len(addr))
 	}
 
 	log.Info("Use defalt address: localhost:8080")

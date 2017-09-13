@@ -190,7 +190,7 @@ func (ctx *Context) Error(err error) {
 
 	ctx.response.SetHeader(constant.HeaderContentType, constant.MIMETextPlainCharsetUTF8)
 	ctx.response.SetStatus(code)
-	fmt.Fprintf(ctx.response.ResponseWriter, content)
+	ctx.response.SetBody([]byte(content))
 }
 
 func (ctx *Context) Redirect(code int, url string) {
@@ -204,7 +204,7 @@ func (ctx *Context) Redirect(code int, url string) {
 	// No 3xx body on POST and PUT
 	if ctx.Method() == "GET" {
 		note := "<a href=\"" + url + "\">Redirect</a>.\n"
-		fmt.Fprintln(ctx.response.ResponseWriter, note)
+		ctx.response.SetBody([]byte(note))
 	}
 }
 
@@ -236,7 +236,9 @@ func (ctx *Context) Text(code int, str string, params ...interface{}) {
 	ctx.response.SetHeader(constant.HeaderContentType, constant.MIMETextPlainCharsetUTF8)
 	ctx.response.SetStatus(code)
 
-	if _, err := fmt.Fprintf(ctx.response.ResponseWriter, str, params...); err != nil {
+	body := fmt.Sprintf(str, params...)
+
+	if _, err := ctx.response.SetBody([]byte(body)); err != nil {
 		log.Error(err)
 	}
 }

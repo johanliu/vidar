@@ -11,7 +11,7 @@ type Response struct {
 	contentLength int
 }
 
-func (res *Response) Write(data []byte) (int, error) {
+func (res *Response) SetBody(data []byte) (int, error) {
 	if res.status == 0 {
 		res.status = http.StatusOK
 	}
@@ -23,6 +23,7 @@ func (res *Response) Write(data []byte) (int, error) {
 }
 
 func (res *Response) SetStatus(code int) {
+	res.status = code
 	res.ResponseWriter.WriteHeader(code)
 }
 
@@ -40,4 +41,12 @@ func (res *Response) DelHeader(key string) {
 
 func (res *Response) Size() (int, error) {
 	return res.contentLength, nil
+}
+
+func (res *Response) Flush() {
+	res.ResponseWriter.(http.Flusher).Flush()
+}
+
+func (res *Response) Hijack() {
+	res.ResponseWriter.(http.Hijacker).Hijack()
 }

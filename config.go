@@ -19,9 +19,9 @@ type tomlConfig struct {
 	}
 }
 
-const configFile string = "default.toml"
+const configFile string = "/etc/vidar.conf"
 
-var Config tomlConfig
+var tc tomlConfig
 
 func init() {
 	f, err := os.Open(configFile)
@@ -36,7 +36,7 @@ func init() {
 		log.Error(err)
 	}
 
-	if err := toml.Unmarshal(buf, &Config); err != nil {
+	if err := toml.Unmarshal(buf, &tc); err != nil {
 		log.Error(err)
 	}
 }

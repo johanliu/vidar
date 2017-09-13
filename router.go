@@ -9,6 +9,8 @@ import (
 	"github.com/johanliu/Vidar/constant"
 )
 
+//TODO: Should implement trie-based router data structure
+
 type Node struct {
 }
 
@@ -16,8 +18,9 @@ type Tree struct {
 }
 
 type Router struct {
-	handlers map[string][]*Endpoint
-	NotFound http.Handler
+	handlers  map[string][]*Endpoint
+	ehandlers map[string][]*Endpoint
+	NotFound  http.Handler
 }
 
 type Endpoint struct {
@@ -63,7 +66,6 @@ func (r *Router) pathParamSplit(path string) map[int]string {
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if eds, ok := r.handlers[req.URL.Path]; ok {
 		for _, ed := range eds {
-
 			if ed.method == req.Method {
 				abc := make(map[int]string)
 				abc[2] = "a"
@@ -79,13 +81,10 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		log.Error(constant.MethodNotAllowedError)
 
 	} else {
-
-		fmt.Println("helloworld111")
 		if r.NotFound != nil {
 			r.NotFound.ServeHTTP(w, req)
 			return
 		}
-
 		fmt.Printf("%s Not Found", req.URL.Path)
 		http.Error(w, "URL Not Found", 404)
 	}
