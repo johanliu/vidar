@@ -95,5 +95,5 @@ func resolveAddress(addr ...string) (string, error) {
 	}
 
 	log.Info("Use defalt address: localhost:8080")
-	return "localhost:8080", nil
+	return "0.0.0.0:8080", nil
 }

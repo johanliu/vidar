@@ -36,7 +36,7 @@ func NewRouter() *Router {
 
 func (r *Router) Add(method string, path string, h http.Handler) {
 	if path[0] != '/' {
-		fmt.Printf("Path must begin with '/' but in : %s", path)
+		fmt.Printf("Path must begin with '/' but in : %s\n", path)
 	}
 
 	ed := &Endpoint{
@@ -46,6 +46,10 @@ func (r *Router) Add(method string, path string, h http.Handler) {
 	}
 
 	r.handlers[path] = append(r.handlers[path], ed)
+}
+
+func (r *Router) ShowHandler() map[string][]*Endpoint {
+	return r.handlers
 }
 
 func (r *Router) pathParamSplit(path string) map[int]string {
