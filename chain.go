@@ -21,8 +21,8 @@ func (f ContextUserFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	f(c)
 }
 
-func NewChain(ring ...Ring) Chain {
-	return Chain{append([]Ring{}, ring...)}
+func NewChain(ring ...Ring) *Chain {
+	return &Chain{append([]Ring{}, ring...)}
 }
 
 func (c *Chain) Use(f ContextUserFunc) http.Handler {

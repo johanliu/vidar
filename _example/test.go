@@ -47,7 +47,7 @@ func jsonHandler(c *vidar.Context) {
 	res := new(response)
 
 	jp := c.NewParser("JSON")
-	if err := jp.Parse(res, c.Request); err != nil {
+	if err := jp.Parse(res, c.Request()); err != nil {
 		c.Error(constant.BadRequestError)
 	} else {
 		c.JSON(200, res)

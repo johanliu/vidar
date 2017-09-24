@@ -1,8 +1,6 @@
 package vidar
 
 import (
-	"context"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -36,7 +34,7 @@ func NewRouter() *Router {
 
 func (r *Router) Add(method string, path string, h http.Handler) {
 	if path[0] != '/' {
-		fmt.Printf("Path must begin with '/' but in : %s\n", path)
+		log.Error(constant.FormatError)
 	}
 
 	ed := &Endpoint{
@@ -61,9 +59,6 @@ func (r *Router) pathParamSplit(path string) map[int]string {
 			container[index] = strings.Split(item, ":")[1]
 		}
 	}
-
-	// fmt.Println(container)
-
 	return container
 }
 
@@ -71,25 +66,21 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if eds, ok := r.handlers[req.URL.Path]; ok {
 		for _, ed := range eds {
 			if ed.method == req.Method {
-				abc := make(map[int]string)
-				abc[2] = "a"
-
-				ctx := context.WithValue(req.Context(), "abc", abc)
-				// fmt.Println(ctx)
-
-				ed.Handler.ServeHTTP(w, req.WithContext(ctx))
+				ed.Handler.ServeHTTP(w, req)
 				return
 			}
 		}
 
 		log.Error(constant.MethodNotAllowedError)
-
+	} else if strings.HasPrefix(req.URL.String(), "/portal/") {
+		// TODO: need to be refactor after router changed, cannot serve static file based on routing map
+		static := http.StripPrefix("/portal/", http.FileServer(http.Dir("portal")))
+		static.ServeHTTP(w, req)
 	} else {
 		if r.NotFound != nil {
 			r.NotFound.ServeHTTP(w, req)
 			return
 		}
-		fmt.Printf("%s Not Found", req.URL.Path)
 		http.Error(w, "URL Not Found", 404)
 	}
 }

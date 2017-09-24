@@ -9,12 +9,15 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/johanliu/Vidar/constant"
 )
 
 const defaultMaxMemory = 32 << 20 //32MB
+const indexPage = "index.html"
 
 // type Parameters []parameter
 
@@ -24,7 +27,7 @@ type Parameters struct {
 }
 
 type Context struct {
-	Request    *http.Request
+	request    *http.Request
 	response   *Response
 	parameters *Parameters
 	// values     url.Values
@@ -35,9 +38,8 @@ type Context struct {
 
 func NewContext(w http.ResponseWriter, r *http.Request) *Context {
 	return &Context{
-		Request:    r,
-		response:   &Response{ResponseWriter: w},
-		parameters: &Parameters{key: "pathParam", value: r.Context().Value("abc").(map[int]string)},
+		request:  r,
+		response: &Response{ResponseWriter: w},
 	}
 }
 
@@ -61,18 +63,26 @@ func (ctx *Context) Get(key string) (interface{}, bool) {
 	return nil, false
 }
 
+func (ctx *Context) Response() http.ResponseWriter {
+	return ctx.response.ResponseWriter
+}
+
+func (ctx *Context) Request() *http.Request {
+	return ctx.request
+}
+
 // Request
 
 func (ctx *Context) Method() string {
-	return ctx.Request.Method
+	return ctx.request.Method
 }
 
 func (ctx *Context) ContentType() string {
-	return ctx.Request.Header.Get(constant.HeaderContentType)
+	return ctx.request.Header.Get(constant.HeaderContentType)
 }
 
 func (ctx *Context) Body() []byte {
-	body, err := ioutil.ReadAll(ctx.Request.Body)
+	body, err := ioutil.ReadAll(ctx.request.Body)
 	if err != nil {
 		log.Error(err)
 	}
@@ -81,13 +91,13 @@ func (ctx *Context) Body() []byte {
 }
 
 func (ctx *Context) RealIP() string {
-	if ip := ctx.Request.Header.Get(constant.HeaderXForwardedFor); ip != "" {
+	if ip := ctx.request.Header.Get(constant.HeaderXForwardedFor); ip != "" {
 		return strings.Split(ip, ",")[0]
-	} else if ip := ctx.Request.Header.Get(constant.HeaderXRealIP); ip != "" {
+	} else if ip := ctx.request.Header.Get(constant.HeaderXRealIP); ip != "" {
 		return ip
 	}
 
-	host, _, err := net.SplitHostPort(ctx.Request.RemoteAddr)
+	host, _, err := net.SplitHostPort(ctx.request.RemoteAddr)
 	if err != nil {
 		log.Error(err)
 	}
@@ -95,7 +105,7 @@ func (ctx *Context) RealIP() string {
 }
 
 func (ctx *Context) Scheme() string {
-	if ctx.Request.TLS != nil {
+	if ctx.request.TLS != nil {
 		return "HTTPS"
 	}
 	return "HTTP"
@@ -105,7 +115,7 @@ func (ctx *Context) Scheme() string {
 // for example: http://localhost:8080/index/department?users=alice
 // return {"users":"alice"}
 func (ctx *Context) QueryParam(key string, defaultvalues ...string) string {
-	values, exists := ctx.Request.URL.Query()[key]
+	values, exists := ctx.request.URL.Query()[key]
 
 	if exists && len(values) > 0 {
 		return values[0]
@@ -116,7 +126,7 @@ func (ctx *Context) QueryParam(key string, defaultvalues ...string) string {
 }
 
 func (ctx *Context) QueryParams() url.Values {
-	return ctx.Request.URL.Query()
+	return ctx.request.URL.Query()
 }
 
 // Path parameters which pick up k-v pairs from URI pathes
@@ -140,7 +150,7 @@ func (ctx *Context) getPathParam(key string) (string, bool) {
 }
 
 func (ctx *Context) FormParam(key string, defaultValues ...string) string {
-	value := ctx.Request.FormValue(key)
+	value := ctx.request.FormValue(key)
 	if value != "" {
 		if len(defaultValues) > 0 {
 			return defaultValues[0]
@@ -150,23 +160,23 @@ func (ctx *Context) FormParam(key string, defaultValues ...string) string {
 }
 
 func (ctx *Context) FormParams() (url.Values, error) {
-	if err := ctx.Request.ParseMultipartForm(defaultMaxMemory); err != nil {
+	if err := ctx.request.ParseMultipartForm(defaultMaxMemory); err != nil {
 		return nil, err
 	}
-	return ctx.Request.Form, nil
+	return ctx.request.Form, nil
 }
 
 func (ctx *Context) Cookie(name string) (*http.Cookie, error) {
-	return ctx.Request.Cookie(name)
+	return ctx.request.Cookie(name)
 }
 
 func (ctx *Context) Cookies() []*http.Cookie {
-	return ctx.Request.Cookies()
+	return ctx.request.Cookies()
 }
 
 // fn.Open()
 func (ctx *Context) FormFile(filename string) (*multipart.FileHeader, error) {
-	_, fh, err := ctx.Request.FormFile(filename)
+	_, fh, err := ctx.request.FormFile(filename)
 	return fh, err
 }
 
@@ -250,4 +260,28 @@ func (ctx *Context) HTML(code int, str string, params ...interface{}) {
 	if _, err := fmt.Fprintf(ctx.response.ResponseWriter, str, params...); err != nil {
 		log.Error(err)
 	}
+}
+
+func (ctx *Context) File(file string) (err error) {
+	f, err := os.Open(file)
+	if err != nil {
+		log.Error(constant.NotFoundError)
+	}
+	defer f.Close()
+
+	fi, _ := f.Stat()
+	if fi.IsDir() {
+		file = filepath.Join(file, indexPage)
+		f, err = os.Open(file)
+		if err != nil {
+			log.Error(constant.NotFoundError)
+		}
+		defer f.Close()
+		if fi, err = f.Stat(); err != nil {
+			log.Error(err)
+		}
+	}
+	// Handle HTTP Range properly
+	http.ServeContent(ctx.response.ResponseWriter, ctx.request, fi.Name(), fi.ModTime(), f)
+	return
 }

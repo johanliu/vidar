@@ -86,7 +86,8 @@ var (
 )
 
 var (
-	TodoError = errors.New("Todo Error")
+	TodoError   = errors.New("Todo Error")
+	FormatError = errors.New("Format Error")
 )
 
 type HTTPError struct {
