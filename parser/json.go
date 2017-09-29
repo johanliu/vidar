@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/johanliu/Vidar/constant"
+	"github.com/johanliu/vidar/constant"
 )
 
 type JSONParser struct{}

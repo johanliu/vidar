@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/naoina/toml"
+	"github.com/BurntSushi/toml"
 )
 
 type tomlConfig struct {

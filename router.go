@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/johanliu/Vidar/constant"
+	"github.com/johanliu/vidar/constant"
 )
 
 //TODO: Should implement trie-based router data structure
@@ -70,9 +70,8 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 				return
 			}
 		}
-
 		log.Error(constant.MethodNotAllowedError)
-	} else if strings.HasPrefix(req.URL.String(), "/portal/") {
+	} else if strings.HasPrefix(req.URL.String(), "/portal") {
 		// TODO: need to be refactor after router changed, cannot serve static file based on routing map
 		static := http.StripPrefix("/portal/", http.FileServer(http.Dir("portal")))
 		static.ServeHTTP(w, req)

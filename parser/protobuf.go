@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/johanliu/Vidar/constant"
+	"github.com/johanliu/vidar/constant"
 )
 
 type ProtobufParser struct{}

@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/johanliu/Vidar/constant"
+	"github.com/johanliu/vidar/constant"
 	"github.com/ugorji/go/codec"
 )
 

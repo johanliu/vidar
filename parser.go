@@ -3,8 +3,8 @@ package vidar
 import (
 	"net/http"
 
-	"github.com/johanliu/Vidar/constant"
-	"github.com/johanliu/Vidar/parser"
+	"github.com/johanliu/vidar/constant"
+	"github.com/johanliu/vidar/parser"
 )
 
 type ParserPlugins interface {

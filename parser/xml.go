@@ -4,7 +4,7 @@ import (
 	"encoding/xml"
 	"net/http"
 
-	"github.com/johanliu/Vidar/constant"
+	"github.com/johanliu/vidar/constant"
 )
 
 type XMLParser struct{}

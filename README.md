@@ -8,8 +8,8 @@ A lightweight Golang web framework
 package main
 
 import (
-	"github.com/johanliu/Vidar"
-	"github.com/johanliu/Vidar/middlewares"
+	"github.com/johanliu/vidar"
+	"github.com/johanliu/vidar/middlewares"
 	"github.com/johanliu/mlog"
 )
 

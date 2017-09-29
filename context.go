@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/johanliu/Vidar/constant"
+	"github.com/johanliu/vidar/constant"
 )
 
 const defaultMaxMemory = 32 << 20 //32MB
