@@ -160,6 +160,13 @@ func (ctx *Context) FormParam(key string, defaultValues ...string) string {
 }
 
 func (ctx *Context) FormParams() (url.Values, error) {
+	if err := ctx.request.ParseForm(); err != nil {
+		return nil, err
+	}
+	return ctx.request.Form, nil
+}
+
+func (ctx *Context) MultiFormParams() (url.Values, error) {
 	if err := ctx.request.ParseMultipartForm(defaultMaxMemory); err != nil {
 		return nil, err
 	}
@@ -190,17 +197,24 @@ func (ctx *Context) SetPath(path string) {
 
 //Response
 func (ctx *Context) Error(err error) {
-	code := constant.InternalServerError.Code
-	content := constant.InternalServerError.Content
+	var code int
+	var content string
 
 	if herr, ok := err.(*constant.HTTPError); ok {
 		code = herr.Code
-		content = herr.Content
+	} else {
+		code = constant.InternalServerError.Code
 	}
+	content = err.Error()
 
-	ctx.response.SetHeader(constant.HeaderContentType, constant.MIMETextPlainCharsetUTF8)
+	ctx.response.SetHeader(constant.HeaderContentType, constant.MIMEApplicationJSONCharsetUTF8)
 	ctx.response.SetStatus(code)
-	ctx.response.SetBody([]byte(content))
+
+	body := map[string]string{"error": content}
+
+	if err := json.NewEncoder(ctx.response.ResponseWriter).Encode(body); err != nil {
+		log.Error(err)
+	}
 }
 
 func (ctx *Context) Redirect(code int, url string) {

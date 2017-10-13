@@ -73,6 +73,8 @@ const (
 
 // Errors
 var (
+	NoContentError = NewHTTPError(http.StatusNoContent) //204
+
 	BadRequestError           = NewHTTPError(http.StatusBadRequest)           //400
 	UnauthorizedError         = NewHTTPError(http.StatusUnauthorized)         //401
 	ForbiddenError            = NewHTTPError(http.StatusForbidden)            //403
@@ -83,6 +85,10 @@ var (
 
 	InternalServerError = NewHTTPError(http.StatusInternalServerError) //500
 	NotImplementedError = NewHTTPError(http.StatusNotImplemented)      //501
+	BadGatewayError     = NewHTTPError(http.StatusBadGateway)          //502
+	GatewayTimeoutError = NewHTTPError(http.StatusGatewayTimeout)      //504
+
+	// CustomMessageError = NewHTTPError(http.StatusNoContent, "No record is found in etcd")
 )
 
 var (
@@ -108,5 +114,5 @@ func NewHTTPError(code int, message ...string) *HTTPError {
 }
 
 func (he *HTTPError) Error() string {
-	return fmt.Sprintf("code=%d, message=%v", he.Code, he.Content)
+	return fmt.Sprint(he.Content)
 }
