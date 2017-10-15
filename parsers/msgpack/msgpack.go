@@ -1,4 +1,4 @@
-package parsers
+package msgpack
 
 import (
 	"net/http"

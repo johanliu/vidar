@@ -44,8 +44,8 @@ func indexHandler(c *vidar.Context) {
 
 func jsonHandler(c *vidar.Context) {
 	res := new(response)
-	jp := vidar.Parsers["JSON"]
 
+	jp := vidar.Parsers["JSON"]
 	if err := jp.Parse(res, c.Request()); err != nil {
 		c.Error(vidar.BadRequestError)
 	} else {
