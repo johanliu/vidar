@@ -9,43 +9,47 @@ import (
 	"github.com/johanliu/mlog"
 )
 
+var log *mlog.Logger = nil
+
 type Vidar struct {
 	Router   *Router
 	Server   *http.Server
 	Listener net.Listener
-	Chain    []Chain
+	Plugins  []Plugin
 	address  string
+	log      *mlog.Logger
 }
 
 type vidarListener struct {
 	*net.TCPListener
 }
 
-var log = mlog.NewLogger()
-
 func New() (v *Vidar) {
+	log = mlog.NewLogger()
+	log.SetLevelByName("INFO")
+
 	v = &Vidar{
 		Router: NewRouter(),
 		Server: new(http.Server),
+		log:    log,
 	}
 
 	v.Server.Handler = v.Router
-	log.SetLevelByName("INFO")
 
 	return
 }
 
 //TODO: Implement cgi and fast cgi interface
 func (v *Vidar) Run() (err error) {
-	v.Server.Addr, err = resolveAddress()
+	v.Server.Addr, err = v.resolveAddress()
 	if err != nil {
-		log.Error(err)
+		v.log.Error(err)
 	}
 
-	log.Info("Running on %s", v.Server.Addr)
+	v.log.Info("Running on %s", v.Server.Addr)
 
 	if err := v.StartServer(v.Server); err != nil {
-		log.Error(err)
+		v.log.Error(err)
 	}
 
 	return nil
@@ -80,7 +84,7 @@ func newListener(proto string, address string) (*vidarListener, error) {
 	return &vidarListener{l.(*net.TCPListener)}, nil
 }
 
-func resolveAddress(addr ...string) (string, error) {
+func (v *Vidar) resolveAddress(addr ...string) (string, error) {
 	switch len(addr) {
 	case 0:
 		if host := tc.Server.Host; len(host) > 0 {
@@ -91,9 +95,9 @@ func resolveAddress(addr ...string) (string, error) {
 	case 2:
 		return strings.Join(addr, ":"), nil
 	default:
-		log.Info("The number of parameters should be given as 0 or 2, but %s is given\n", len(addr))
+		v.log.Info("The number of parameters should be given as 0 or 2, but %s is given\n", len(addr))
 	}
 
-	log.Info("Use defalt address: localhost:8080")
+	v.log.Info("Use defalt address: localhost:8080")
 	return "0.0.0.0:8080", nil
 }

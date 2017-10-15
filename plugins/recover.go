@@ -1,24 +1,24 @@
-package middlewares
+package plugins
 
 import (
 	"net/http"
 	"runtime"
+
+	"github.com/johanliu/vidar"
 )
 
 var stackSize = 4 << 10 //4KB
 
 func RecoverHandler(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
+	return vidar.ContextFunc(func(ctx *vidar.Context) {
 		defer func() {
 			if err := recover(); err != nil {
 				stack := make([]byte, stackSize)
 				runtime.Stack(stack, false)
-				log.Info("\n %s %s \n", err, stack)
-				http.Error(w, http.StatusText(500), 500)
+				ctx.Log.Info("\n %s %s \n", err, stack)
+				ctx.Error(vidar.InternalServerError)
 			}
 		}()
-
-		h.ServeHTTP(w, r)
+		ctx.Call(h)
 	})
 }

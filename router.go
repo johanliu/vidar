@@ -2,79 +2,109 @@ package vidar
 
 import (
 	"net/http"
+	"net/url"
 	"strings"
-
-	"github.com/johanliu/vidar/constant"
 )
 
-//TODO: Should implement trie-based router data structure
-
-type Node struct {
-}
-
-type Tree struct {
-}
-
 type Router struct {
-	handlers  map[string][]*Endpoint
-	ehandlers map[string][]*Endpoint
-	NotFound  http.Handler
+	tree     *node
+	NotFound http.Handler
 }
 
+type node struct {
+	children     []*node
+	component    string
+	isNamedParam bool
+	methods      map[string]http.Handler
+}
+
+func (n *node) addNode(method, path string, h http.Handler) {
+	components := strings.Split(path, "/")[1:]
+	count := len(components)
+
+	for {
+		if count == 0 {
+			break
+		}
+
+		oldNode, component := n.findNode(components, nil)
+		if oldNode.component == component && count == 1 {
+			oldNode.methods[method] = h
+			return
+		}
+
+		newNode := &node{
+			component: component,
+			methods:   make(map[string]http.Handler),
+		}
+
+		if len(component) > 0 && component[0] == ':' {
+			newNode.isNamedParam = true
+		} else {
+			newNode.isNamedParam = false
+		}
+
+		if count == 1 {
+			newNode.methods[method] = h
+		}
+
+		oldNode.children = append(oldNode.children, newNode)
+		count--
+	}
+}
+
+func (n *node) findNode(components []string, params url.Values) (*node, string) {
+	component := components[0]
+	if len(n.children) > 0 {
+
+		for _, child := range n.children {
+			if component == child.component || child.isNamedParam {
+				if child.isNamedParam && params != nil {
+					params.Add(child.component[1:], component)
+				}
+				next := components[1:]
+				if len(next) > 0 {
+					return child.findNode(next, params)
+				} else {
+					return child, component
+				}
+			}
+		}
+	}
+	return n, component
+}
+
+/*
 type Endpoint struct {
 	method string
 	http.Handler
-	redirect  bool
-	PathParam map[int]string
-}
+}*/
 
 func NewRouter() *Router {
-	return &Router{handlers: make(map[string][]*Endpoint)}
+	root := node{component: "/", isNamedParam: false, methods: make(map[string]http.Handler)}
+	return &Router{tree: &root}
 }
 
 func (r *Router) Add(method string, path string, h http.Handler) {
 	if path[0] != '/' {
-		log.Error(constant.FormatError)
+		log.Error(FormatError)
 	}
 
-	ed := &Endpoint{
-		method:    method,
-		Handler:   h,
-		PathParam: r.pathParamSplit(path),
-	}
-
-	r.handlers[path] = append(r.handlers[path], ed)
+	r.tree.addNode(method, path, h)
 }
 
+func (r *Router) Find(method string, path string, h http.Handler) {}
+
+/*
 func (r *Router) ShowHandler() map[string][]*Endpoint {
 	return r.handlers
-}
-
-func (r *Router) pathParamSplit(path string) map[int]string {
-	container := make(map[int]string)
-
-	segment := strings.Split(path, "/")
-	for index, item := range segment {
-		if strings.HasPrefix(item, ":") {
-			container[index] = strings.Split(item, ":")[1]
-		}
-	}
-	return container
-}
+}*/
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	if eds, ok := r.handlers[req.URL.Path]; ok {
-		for _, ed := range eds {
-			if ed.method == req.Method {
-				ed.Handler.ServeHTTP(w, req)
-				return
-			}
-		}
-		log.Error(constant.MethodNotAllowedError)
-	} else if strings.HasPrefix(req.URL.String(), "/portal") {
-		// TODO: need to be refactor after router changed, cannot serve static file based on routing map
-		static := http.StripPrefix("/portal/", http.FileServer(http.Dir("portal")))
-		static.ServeHTTP(w, req)
+	node, _ := r.tree.findNode(strings.Split(req.URL.Path, "/")[1:], req.Form)
+
+	if handler := node.methods[req.Method]; handler != nil {
+		handler.ServeHTTP(w, req)
 	} else {
 		if r.NotFound != nil {
 			r.NotFound.ServeHTTP(w, req)
@@ -85,21 +115,21 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *Router) GET(path string, h http.Handler) {
-	r.Add(constant.GET, path, h)
+	r.Add(GET, path, h)
 }
 
 func (r *Router) POST(path string, h http.Handler) {
-	r.Add(constant.POST, path, h)
+	r.Add(POST, path, h)
 }
 
 func (r *Router) DELETE(path string, h http.Handler) {
-	r.Add(constant.DELETE, path, h)
+	r.Add(DELETE, path, h)
 }
 
 func (r *Router) PUT(path string, h http.Handler) {
-	r.Add(constant.PUT, path, h)
+	r.Add(PUT, path, h)
 }
 
 func (r *Router) PATCH(path string, h http.Handler) {
-	r.Add(constant.PATCH, path, h)
+	r.Add(PATCH, path, h)
 }

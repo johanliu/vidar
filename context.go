@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/johanliu/vidar/constant"
+	"github.com/johanliu/mlog"
 )
 
 const defaultMaxMemory = 32 << 20 //32MB
@@ -34,13 +34,16 @@ type Context struct {
 	container map[string]interface{}
 	status    int
 	path      string
+	Log       *mlog.Logger
 }
 
 func NewContext(w http.ResponseWriter, r *http.Request) *Context {
-	return &Context{
+	c := &Context{
 		request:  r,
 		response: &Response{ResponseWriter: w},
 	}
+
+	return c
 }
 
 // Internal
@@ -71,6 +74,12 @@ func (ctx *Context) Request() *http.Request {
 	return ctx.request
 }
 
+func (ctx *Context) Call(h http.Handler) {
+	if f, ok := h.(ContextFunc); ok {
+		f(ctx)
+	}
+}
+
 // Request
 
 func (ctx *Context) Method() string {
@@ -78,22 +87,22 @@ func (ctx *Context) Method() string {
 }
 
 func (ctx *Context) ContentType() string {
-	return ctx.request.Header.Get(constant.HeaderContentType)
+	return ctx.request.Header.Get(HeaderContentType)
 }
 
 func (ctx *Context) Body() []byte {
 	body, err := ioutil.ReadAll(ctx.request.Body)
 	if err != nil {
-		log.Error(err)
+		ctx.Log.Error(err)
 	}
 
 	return body
 }
 
 func (ctx *Context) RealIP() string {
-	if ip := ctx.request.Header.Get(constant.HeaderXForwardedFor); ip != "" {
+	if ip := ctx.request.Header.Get(HeaderXForwardedFor); ip != "" {
 		return strings.Split(ip, ",")[0]
-	} else if ip := ctx.request.Header.Get(constant.HeaderXRealIP); ip != "" {
+	} else if ip := ctx.request.Header.Get(HeaderXRealIP); ip != "" {
 		return ip
 	}
 
@@ -200,14 +209,14 @@ func (ctx *Context) Error(err error) {
 	var code int
 	var content string
 
-	if herr, ok := err.(*constant.HTTPError); ok {
+	if herr, ok := err.(*HTTPError); ok {
 		code = herr.Code
 	} else {
-		code = constant.InternalServerError.Code
+		code = InternalServerError.Code
 	}
 	content = err.Error()
 
-	ctx.response.SetHeader(constant.HeaderContentType, constant.MIMEApplicationJSONCharsetUTF8)
+	ctx.response.SetHeader(HeaderContentType, MIMEApplicationJSONCharsetUTF8)
 	ctx.response.SetStatus(code)
 
 	body := map[string]string{"error": content}
@@ -222,7 +231,7 @@ func (ctx *Context) Redirect(code int, url string) {
 		log.Error(errors.New("InvalidRedirectError"))
 	}
 
-	ctx.response.SetHeader(constant.HeaderLocation, url)
+	ctx.response.SetHeader(HeaderLocation, url)
 	ctx.response.SetStatus(code)
 
 	// No 3xx body on POST and PUT
@@ -234,12 +243,12 @@ func (ctx *Context) Redirect(code int, url string) {
 
 func (ctx *Context) SetCookie(cookie *http.Cookie) {
 	if v := cookie.String(); v != "" {
-		ctx.response.AddHeader(constant.HeaderSetCookie, v)
+		ctx.response.AddHeader(HeaderSetCookie, v)
 	}
 }
 
 func (ctx *Context) XML(code int, body interface{}) {
-	ctx.response.SetHeader(constant.HeaderContentType, constant.MIMEApplicationXMLCharsetUTF8)
+	ctx.response.SetHeader(HeaderContentType, MIMEApplicationXMLCharsetUTF8)
 	ctx.response.SetStatus(code)
 
 	if err := json.NewEncoder(ctx.response.ResponseWriter).Encode(body); err != nil {
@@ -248,7 +257,7 @@ func (ctx *Context) XML(code int, body interface{}) {
 }
 
 func (ctx *Context) JSON(code int, body interface{}) {
-	ctx.response.SetHeader(constant.HeaderContentType, constant.MIMEApplicationJSONCharsetUTF8)
+	ctx.response.SetHeader(HeaderContentType, MIMEApplicationJSONCharsetUTF8)
 	ctx.response.SetStatus(code)
 
 	if err := json.NewEncoder(ctx.response.ResponseWriter).Encode(body); err != nil {
@@ -257,29 +266,29 @@ func (ctx *Context) JSON(code int, body interface{}) {
 }
 
 func (ctx *Context) Text(code int, str string, params ...interface{}) {
-	ctx.response.SetHeader(constant.HeaderContentType, constant.MIMETextPlainCharsetUTF8)
+	ctx.response.SetHeader(HeaderContentType, MIMETextPlainCharsetUTF8)
 	ctx.response.SetStatus(code)
 
 	body := fmt.Sprintf(str, params...)
 
 	if _, err := ctx.response.SetBody([]byte(body)); err != nil {
-		log.Error(err)
+		ctx.Log.Error(err)
 	}
 }
 
 func (ctx *Context) HTML(code int, str string, params ...interface{}) {
-	ctx.response.SetHeader(constant.HeaderContentType, constant.MIMETextHTMLCharsetUTF8)
+	ctx.response.SetHeader(HeaderContentType, MIMETextHTMLCharsetUTF8)
 	ctx.response.SetStatus(code)
 
 	if _, err := fmt.Fprintf(ctx.response.ResponseWriter, str, params...); err != nil {
-		log.Error(err)
+		ctx.Log.Error(err)
 	}
 }
 
 func (ctx *Context) File(file string) (err error) {
 	f, err := os.Open(file)
 	if err != nil {
-		log.Error(constant.NotFoundError)
+		log.Error(NotFoundError)
 	}
 	defer f.Close()
 
@@ -288,7 +297,7 @@ func (ctx *Context) File(file string) (err error) {
 		file = filepath.Join(file, indexPage)
 		f, err = os.Open(file)
 		if err != nil {
-			log.Error(constant.NotFoundError)
+			log.Error(NotFoundError)
 		}
 		defer f.Close()
 		if fi, err = f.Stat(); err != nil {
