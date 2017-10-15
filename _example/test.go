@@ -1,10 +1,9 @@
 package main
 
 import (
-	"github.com/johanliu/Vidar"
-	"github.com/johanliu/Vidar/constant"
-	"github.com/johanliu/Vidar/middlewares"
 	"github.com/johanliu/mlog"
+	"github.com/johanliu/vidar"
+	"github.com/johanliu/vidar/plugins"
 )
 
 var log = mlog.NewLogger()
@@ -45,10 +44,10 @@ func indexHandler(c *vidar.Context) {
 
 func jsonHandler(c *vidar.Context) {
 	res := new(response)
+	jp := vidar.Parsers["JSON"]
 
-	jp := c.NewParser("JSON")
 	if err := jp.Parse(res, c.Request()); err != nil {
-		c.Error(constant.BadRequestError)
+		c.Error(vidar.BadRequestError)
 	} else {
 		c.JSON(200, res)
 	}
@@ -60,22 +59,21 @@ func userHandler(c *vidar.Context) {
 }
 
 func notFoundHandler(c *vidar.Context) {
-	c.Error(constant.NotFoundError)
+	c.Error(vidar.NotFoundError)
 }
 
 func main() {
-	commonHandler := vidar.NewChain()
-
-	commonHandler.Append(middlewares.LoggingHandler)
-	commonHandler.Append(middlewares.RecoverHandler)
-
 	v := vidar.New()
 
-	v.Router.Add("GET", "/", commonHandler.Use(indexHandler))
-	v.Router.Add("POST", "/", commonHandler.Use(indexHandler))
-	v.Router.POST("/json", commonHandler.Use(jsonHandler))
-	v.Router.Add("GET", "/users/:id", commonHandler.Use(userHandler))
-	v.Router.NotFound = commonHandler.Use(notFoundHandler)
+	p := vidar.NewPlugin()
+	p.Append(plugins.LoggingHandler)
+	p.Append(plugins.RecoverHandler)
+
+	v.Router.Add("GET", "/", p.Apply(indexHandler))
+	v.Router.Add("POST", "/", p.Apply(indexHandler))
+	v.Router.POST("/json", p.Apply(jsonHandler))
+
+	v.Router.NotFound = p.Apply(notFoundHandler)
 
 	v.Run()
 }
