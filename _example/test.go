@@ -57,7 +57,7 @@ func jsonHandler(c *vidar.Context) {
 func staffHandler(c *vidar.Context) {
 	username := c.PathParam("username")
 
-	c.Text(200, username)
+	c.JSON(200, map[string]string{"username": username})
 }
 
 func userHandler(c *vidar.Context) {
@@ -80,10 +80,11 @@ func main() {
 	v.Router.Add("POST", "/", p.Apply(indexHandler))
 
 	// Custom parser
-	v.Router.POST("/json", p.Apply(jsonHandler))
+	v.Router.POST("/json/read/here", p.Apply(jsonHandler))
+	v.Router.GET("/json/read/here", p.Apply(staffHandler))
 
 	//Path parameter
-	v.Router.GET("/staff/:username", p.Apply(staffHandler))
+	v.Router.GET("/staff/:username/id", p.Apply(staffHandler))
 
 	v.Router.NotFound = p.Apply(notFoundHandler)
 

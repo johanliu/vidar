@@ -24,27 +24,32 @@ func (n *node) addNode(method, path string, h http.Handler) {
 	c := components
 
 	for {
-		current, component := n.findNode(c, nil)
+		oldNode, component := n.findNode(c, nil)
 
-		if current.component == component {
-			current.handlers[method] = h
+		if oldNode.component == component {
+			oldNode.handlers[method] = h
 			break
 		}
 
 		newNode := &node{
-			height:    current.height + 1,
+			height:    oldNode.height + 1,
 			component: component,
-			handlers:  map[string]http.Handler{method: h},
+			handlers:  make(map[string]http.Handler),
 		}
+
+		oldNode.children = append(oldNode.children, newNode)
 
 		if len(component) > 2 && component[0] == ':' {
 			newNode.isPathParam = true
 		}
 
-		current.children = append(current.children, newNode)
-
 		n = newNode
-		c = components[newNode.height-1:]
+		c = components[newNode.height:]
+
+		if len(c) == 0 {
+			newNode.handlers[method] = h
+			break
+		}
 	}
 }
 
@@ -53,11 +58,11 @@ func (n *node) findNode(components []string, forms url.Values) (*node, string) {
 
 	if len(n.children) > 0 {
 		for _, child := range n.children {
-			if child.isPathParam && forms != nil {
-				forms.Add(child.component[1:], component)
-			}
+			if component == child.component || child.isPathParam {
+				if forms != nil {
+					forms.Add(child.component[1:], component)
+				}
 
-			if component == child.component {
 				next := components[1:]
 				if len(next) > 0 {
 					return child.findNode(next, forms)
@@ -94,7 +99,12 @@ func (r *Router) Show() *node {
 }
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	if req.Form == nil {
+		req.Form = make(url.Values)
+	}
 	node, _ := r.tree.findNode(strings.Split(req.URL.Path, "/")[1:], req.Form)
+
+	log.Info("finally we got %+v", node)
 
 	if handler := node.handlers[req.Method]; handler != nil {
 		handler.ServeHTTP(w, req)
