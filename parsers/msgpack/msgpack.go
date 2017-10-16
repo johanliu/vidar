@@ -27,5 +27,5 @@ func (mp *MsgpackParser) Parse(obj interface{}, req *http.Request) error {
 }
 
 func init() {
-	vidar.AddParser("Msgpack", &JSONParser{})
+	vidar.AddParser("Msgpack", &MsgpackParser{})
 }

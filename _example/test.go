@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/johanliu/mlog"
 	"github.com/johanliu/vidar"
+	_ "github.com/johanliu/vidar/parsers"
 	"github.com/johanliu/vidar/plugins"
 )
 
@@ -45,12 +46,18 @@ func indexHandler(c *vidar.Context) {
 func jsonHandler(c *vidar.Context) {
 	res := new(response)
 
-	jp := vidar.Parsers["JSON"]
-	if err := jp.Parse(res, c.Request()); err != nil {
+	p := vidar.Parsers["JSON"]
+	if err := p.Parse(res, c.Request()); err != nil {
 		c.Error(vidar.BadRequestError)
 	} else {
 		c.JSON(200, res)
 	}
+}
+
+func staffHandler(c *vidar.Context) {
+	username := c.PathParam("username")
+
+	c.Text(200, username)
 }
 
 func userHandler(c *vidar.Context) {
@@ -71,7 +78,12 @@ func main() {
 
 	v.Router.Add("GET", "/", p.Apply(indexHandler))
 	v.Router.Add("POST", "/", p.Apply(indexHandler))
+
+	// Custom parser
 	v.Router.POST("/json", p.Apply(jsonHandler))
+
+	//Path parameter
+	v.Router.GET("/staff/:username", p.Apply(staffHandler))
 
 	v.Router.NotFound = p.Apply(notFoundHandler)
 

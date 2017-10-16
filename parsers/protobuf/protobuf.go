@@ -33,5 +33,5 @@ func (pp *ProtobufParser) Parse(obj interface{}, req *http.Request) error {
 }
 
 func init() {
-	vidar.AddParser("Protobuf", &JSONParser{})
+	vidar.AddParser("Protobuf", &ProtobufParser{})
 }

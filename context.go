@@ -19,20 +19,10 @@ import (
 const defaultMaxMemory = 32 << 20 //32MB
 const indexPage = "index.html"
 
-// type Parameters []parameter
-
-type Parameters struct {
-	key   string
-	value map[int]string
-}
-
 type Context struct {
-	request    *http.Request
-	response   *Response
-	parameters *Parameters
-	// values     url.Values
+	request   *http.Request
+	response  *Response
 	container map[string]interface{}
-	status    int
 	path      string
 	Log       *mlog.Logger
 }
@@ -144,18 +134,17 @@ func (ctx *Context) QueryParams() url.Values {
 // It should be supported by users which defined router for query like
 // "/index/department/users/:users"
 func (ctx *Context) PathParam(key string, defaultValues ...string) string {
-	value, ok := ctx.getPathParam(key)
-	if ok {
+	value, ok := ctx.request.Form[key]
+	if !ok {
 		if len(defaultValues) > 0 {
 			return defaultValues[0]
 		}
 	}
-	return value
+	return value[0]
 }
 
-func (ctx *Context) getPathParam(key string) (string, bool) {
-	//TODO
-	return ctx.parameters.value[2], true
+func (ctx *Context) PathParams() (url.Values, error) {
+	return ctx.request.Form, nil
 }
 
 func (ctx *Context) FormParam(key string, defaultValues ...string) string {

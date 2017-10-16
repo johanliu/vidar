@@ -22,5 +22,5 @@ func (xp *XMLParser) Parse(obj interface{}, req *http.Request) error {
 }
 
 func init() {
-	vidar.AddParser("XML", &JSONParser{})
+	vidar.AddParser("XML", &XMLParser{})
 }
