@@ -15,7 +15,7 @@ type Vidar struct {
 	Router   *Router
 	Server   *http.Server
 	Listener net.Listener
-	Plugins  []Plugin
+	Plugin   *Plugin
 	address  string
 	log      *mlog.Logger
 }
@@ -31,6 +31,7 @@ func New() (v *Vidar) {
 	v = &Vidar{
 		Router: NewRouter(),
 		Server: new(http.Server),
+		Plugin: NewPlugin(),
 		log:    log,
 	}
 

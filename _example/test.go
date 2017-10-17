@@ -16,8 +16,6 @@ type response struct {
 
 func indexHandler(c *vidar.Context) {
 	if c.Method() == "GET" {
-		// version := c.QueryParam("version", "123")
-
 		result := `
 		<html>
 		<header>This is header</header>
@@ -29,17 +27,13 @@ func indexHandler(c *vidar.Context) {
 	}
 
 	if c.Method() == "POST" {
-		/*
-			name := c.FormParam("name")
-			value := c.FormParam("value")
+		name := c.FormParam("name")
+		value := c.FormParam("value")
 
-			result := map[string]string{
-				"message": "hello " + name + value,
-			}
-			c.JSON(200, result)
-		*/
-		body := c.Body()
-		c.Text(200, string(body[:]))
+		result := map[string]string{
+			"message": "hello " + name + value,
+		}
+		c.JSON(200, result)
 	}
 }
 
@@ -71,8 +65,8 @@ func notFoundHandler(c *vidar.Context) {
 
 func main() {
 	v := vidar.New()
+	p := v.Plugin
 
-	p := vidar.NewPlugin()
 	p.Append(plugins.LoggingHandler)
 	p.Append(plugins.RecoverHandler)
 
@@ -83,9 +77,19 @@ func main() {
 	v.Router.POST("/json/read/here", p.Apply(jsonHandler))
 	v.Router.GET("/json/read/here", p.Apply(staffHandler))
 
-	//Path parameter
+	// Path parameter
 	v.Router.GET("/staff/:username/id", p.Apply(staffHandler))
 
+	// File handler
+	//v.Router.File("/", "./public/hello.txt")
+
+	// index.html by default
+	v.Router.File("/", "./public")
+
+	// Static resource, serve all files in directory
+	v.Router.Static("/portal", "./public")
+
+	// NotFound handler
 	v.Router.NotFound = p.Apply(notFoundHandler)
 
 	v.Run()

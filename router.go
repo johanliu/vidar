@@ -3,6 +3,8 @@ package vidar
 import (
 	"net/http"
 	"net/url"
+	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -16,6 +18,7 @@ type node struct {
 	children    []*node
 	component   string
 	isPathParam bool
+	isStatic    bool
 	handlers    map[string]http.Handler
 }
 
@@ -59,7 +62,7 @@ func (n *node) findNode(components []string, forms url.Values) (*node, string) {
 	if len(n.children) > 0 {
 		for _, child := range n.children {
 			if component == child.component || child.isPathParam {
-				if forms != nil {
+				if forms != nil && child.isPathParam {
 					forms.Add(child.component[1:], component)
 				}
 
@@ -104,8 +107,6 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	node, _ := r.tree.findNode(strings.Split(req.URL.Path, "/")[1:], req.Form)
 
-	log.Info("finally we got %+v", node)
-
 	if handler := node.handlers[req.Method]; handler != nil {
 		handler.ServeHTTP(w, req)
 	} else {
@@ -136,4 +137,39 @@ func (r *Router) PUT(path string, h http.Handler) {
 
 func (r *Router) PATCH(path string, h http.Handler) {
 	r.Add(PATCH, path, h)
+}
+
+func (r *Router) File(path, file string) {
+	r.GET(path, ContextFunc(func(c *Context) {
+		if err := c.File(file); err != nil {
+			c.Error(err)
+			c.Log.Error(err)
+		}
+	}))
+}
+
+func (r *Router) Static(prefix, root string) {
+	r.GET(
+		prefix,
+		http.StripPrefix(prefix, ContextFunc(func(c *Context) {
+			if root == "" {
+				root = "./"
+			}
+
+			if !strings.HasSuffix(root, "/") {
+				root = root + "/"
+			}
+
+			upath := c.request.URL.Path
+			if !strings.HasPrefix(upath, "/") {
+				upath = "/" + upath
+				c.request.URL.Path = upath
+			}
+
+			name := filepath.Join(root, path.Clean(upath)) // "/"+ for security
+			if err := c.File(name); err != nil {
+				c.Error(err)
+				c.Log.Error(err)
+			}
+		})))
 }

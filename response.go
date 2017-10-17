@@ -27,6 +27,10 @@ func (res *Response) SetStatus(code int) {
 	res.ResponseWriter.WriteHeader(code)
 }
 
+func (res *Response) Status() int {
+	return res.status
+}
+
 func (res *Response) SetHeader(key string, value string) {
 	res.ResponseWriter.Header().Set(key, value)
 }

@@ -274,26 +274,27 @@ func (ctx *Context) HTML(code int, str string, params ...interface{}) {
 	}
 }
 
-func (ctx *Context) File(file string) (err error) {
+func (ctx *Context) File(file string) error {
 	f, err := os.Open(file)
 	if err != nil {
-		log.Error(NotFoundError)
+		return err
 	}
 	defer f.Close()
 
 	fi, _ := f.Stat()
+
 	if fi.IsDir() {
 		file = filepath.Join(file, indexPage)
 		f, err = os.Open(file)
 		if err != nil {
-			log.Error(NotFoundError)
+			return err
 		}
 		defer f.Close()
 		if fi, err = f.Stat(); err != nil {
-			log.Error(err)
+			return err
 		}
 	}
-	// Handle HTTP Range properly
+
 	http.ServeContent(ctx.response.ResponseWriter, ctx.request, fi.Name(), fi.ModTime(), f)
-	return
+	return nil
 }
