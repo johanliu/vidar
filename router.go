@@ -25,6 +25,7 @@ type node struct {
 func (n *node) addNode(method, path string, h http.Handler) {
 	components := strings.Split(path, "/")[1:]
 	c := components
+	root := n
 
 	for {
 		oldNode, component := n.findNode(c, nil)
@@ -44,6 +45,11 @@ func (n *node) addNode(method, path string, h http.Handler) {
 
 		if len(component) > 2 && component[0] == ':' {
 			newNode.isPathParam = true
+		}
+
+		// Ugly, Ugly, need to be refactored
+		if component == "*" {
+			root.handlers[method] = h
 		}
 
 		n = newNode
@@ -105,7 +111,10 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if req.Form == nil {
 		req.Form = make(url.Values)
 	}
+
 	node, _ := r.tree.findNode(strings.Split(req.URL.Path, "/")[1:], req.Form)
+
+	log.Debug("We find %+v, which have handlers %+v", node.component, node.handlers)
 
 	if handler := node.handlers[req.Method]; handler != nil {
 		handler.ServeHTTP(w, req)
@@ -149,27 +158,31 @@ func (r *Router) File(path, file string) {
 }
 
 func (r *Router) Static(prefix, root string) {
-	r.GET(
-		prefix,
-		http.StripPrefix(prefix, ContextFunc(func(c *Context) {
-			if root == "" {
-				root = "./"
-			}
+	h := ContextFunc(func(c *Context) {
+		if root == "" {
+			root = "./"
+		}
 
-			if !strings.HasSuffix(root, "/") {
-				root = root + "/"
-			}
+		if !strings.HasSuffix(root, "/") {
+			root = root + "/"
+		}
 
-			upath := c.request.URL.Path
-			if !strings.HasPrefix(upath, "/") {
-				upath = "/" + upath
-				c.request.URL.Path = upath
-			}
+		upath := c.request.URL.Path
+		if !strings.HasPrefix(upath, "/") {
+			upath = "/" + upath
+			c.request.URL.Path = upath
+		}
 
-			name := filepath.Join(root, path.Clean(upath)) // "/"+ for security
-			if err := c.File(name); err != nil {
-				c.Error(err)
-				c.Log.Error(err)
-			}
-		})))
+		name := filepath.Join(root, path.Clean(upath)) // "/"+ for security
+		if err := c.File(name); err != nil {
+			c.Error(err)
+			c.Log.Error(err)
+		}
+	})
+
+	r.GET(prefix, h)
+
+	if prefix == "/" {
+		r.GET(prefix+"*", h)
+	}
 }

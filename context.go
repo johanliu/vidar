@@ -17,7 +17,7 @@ import (
 )
 
 const defaultMaxMemory = 32 << 20 //32MB
-const indexPage = "index.html"
+const indexPage = "/index.html"
 
 type Context struct {
 	request   *http.Request
@@ -228,6 +228,15 @@ func (ctx *Context) Redirect(code int, url string) {
 		note := "<a href=\"" + url + "\">Redirect</a>.\n"
 		ctx.response.SetBody([]byte(note))
 	}
+}
+
+func (ctx *Context) localRedirect(url string) {
+	if q := ctx.request.URL.RawQuery; q != "" {
+		url += "?" + q
+	}
+
+	ctx.response.SetHeader(HeaderLocation, url)
+	ctx.response.SetStatus(http.StatusMovedPermanently)
 }
 
 func (ctx *Context) SetCookie(cookie *http.Cookie) {

@@ -70,8 +70,8 @@ func main() {
 	p.Append(plugins.LoggingHandler)
 	p.Append(plugins.RecoverHandler)
 
-	v.Router.Add("GET", "/", p.Apply(indexHandler))
-	v.Router.Add("POST", "/", p.Apply(indexHandler))
+	// v.Router.Add("GET", "/", p.Apply(indexHandler))
+	// v.Router.Add("POST", "/", p.Apply(indexHandler))
 
 	// Custom parser
 	v.Router.POST("/json/read/here", p.Apply(jsonHandler))
@@ -84,10 +84,10 @@ func main() {
 	//v.Router.File("/", "./public/hello.txt")
 
 	// index.html by default
-	v.Router.File("/", "./public")
+	// v.Router.File("/", "./public")
 
 	// Static resource, serve all files in directory
-	v.Router.Static("/portal", "./public")
+	v.Router.Static("/", "./public")
 
 	// NotFound handler
 	v.Router.NotFound = p.Apply(notFoundHandler)
