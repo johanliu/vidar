@@ -87,7 +87,7 @@ func main() {
 	// v.Router.File("/", "./public")
 
 	// Static resource, serve all files in directory
-	v.Router.Static("/", "./public")
+	v.Router.Static("/", "./public", v.Plugin)
 
 	// NotFound handler
 	v.Router.NotFound = p.Apply(notFoundHandler)
