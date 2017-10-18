@@ -98,7 +98,8 @@ func (r *Router) Add(method string, path string, h http.Handler) {
 	r.tree.addNode(method, path, h)
 }
 
-func (r *Router) Find(method string, path string, h http.Handler) {
+//TODO: to be implemented
+func (r *Router) Find(path string) {
 	components := strings.Split(path, "/")[1:]
 	r.tree.findNode(components, nil)
 }
@@ -113,7 +114,6 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	node, _ := r.tree.findNode(strings.Split(req.URL.Path, "/")[1:], req.Form)
-
 	log.Debug("We find %+v, which have handlers %+v", node.component, node.handlers)
 
 	if handler := node.handlers[req.Method]; handler != nil {

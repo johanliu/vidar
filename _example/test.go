@@ -79,6 +79,7 @@ func main() {
 
 	// Path parameter
 	v.Router.GET("/staff/:username/id", p.Apply(staffHandler))
+	v.Router.GET("/staff/:username", p.Apply(staffHandler))
 
 	// File handler
 	//v.Router.File("/", "./public/hello.txt")
