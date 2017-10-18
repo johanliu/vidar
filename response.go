@@ -6,9 +6,9 @@ import (
 
 type Response struct {
 	http.ResponseWriter
-	status        int
 	contentType   string
 	contentLength int
+	status        int
 }
 
 func (res *Response) SetBody(data []byte) (int, error) {

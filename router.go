@@ -157,8 +157,8 @@ func (r *Router) File(path, file string) {
 	}))
 }
 
-func (r *Router) Static(prefix, root string) {
-	h := ContextFunc(func(c *Context) {
+func (r *Router) Static(prefix, root string, p *Plugin) {
+	h := p.Apply(ContextFunc(func(c *Context) {
 		if root == "" {
 			root = "./"
 		}
@@ -178,7 +178,7 @@ func (r *Router) Static(prefix, root string) {
 			c.Error(err)
 			c.Log.Error(err)
 		}
-	})
+	}))
 
 	r.GET(prefix, h)
 

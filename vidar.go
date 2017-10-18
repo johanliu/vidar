@@ -26,7 +26,7 @@ type vidarListener struct {
 
 func New() (v *Vidar) {
 	log = mlog.NewLogger()
-	log.SetLevelByName("DEBUG")
+	log.SetLevelByName("INFO")
 
 	v = &Vidar{
 		Router: NewRouter(),

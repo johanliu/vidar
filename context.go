@@ -56,8 +56,8 @@ func (ctx *Context) Get(key string) (interface{}, bool) {
 	return nil, false
 }
 
-func (ctx *Context) Response() http.ResponseWriter {
-	return ctx.response.ResponseWriter
+func (ctx *Context) Response() *Response {
+	return ctx.response
 }
 
 func (ctx *Context) Request() *http.Request {
@@ -139,7 +139,9 @@ func (ctx *Context) PathParam(key string, defaultValues ...string) string {
 		if len(defaultValues) > 0 {
 			return defaultValues[0]
 		}
+		return ""
 	}
+
 	return value[0]
 }
 
@@ -286,7 +288,7 @@ func (ctx *Context) HTML(code int, str string, params ...interface{}) {
 func (ctx *Context) File(file string) error {
 	f, err := os.Open(file)
 	if err != nil {
-		return err
+		return NotFoundError
 	}
 	defer f.Close()
 
@@ -296,14 +298,15 @@ func (ctx *Context) File(file string) error {
 		file = filepath.Join(file, indexPage)
 		f, err = os.Open(file)
 		if err != nil {
-			return err
+			return NotFoundError
 		}
 		defer f.Close()
 		if fi, err = f.Stat(); err != nil {
-			return err
+			return NotFoundError
 		}
 	}
 
 	http.ServeContent(ctx.response.ResponseWriter, ctx.request, fi.Name(), fi.ModTime(), f)
+	ctx.response.status = 200
 	return nil
 }
