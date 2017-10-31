@@ -24,7 +24,7 @@ type vidarListener struct {
 	*net.TCPListener
 }
 
-func New() (v *Vidar) {
+func New() (log *mlog.Logger, v *Vidar) {
 	log = mlog.NewLogger()
 	log.SetLevelByName("INFO")
 
