@@ -1,13 +1,10 @@
 package main
 
 import (
-	"github.com/johanliu/mlog"
 	"github.com/johanliu/vidar"
 	_ "github.com/johanliu/vidar/parsers"
 	"github.com/johanliu/vidar/plugins"
 )
-
-var log = mlog.NewLogger()
 
 type response struct {
 	Name string `json:"name"`
