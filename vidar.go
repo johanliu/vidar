@@ -40,7 +40,7 @@ func New() (log *mlog.Logger, v *Vidar) {
 	return
 }
 
-//TODO: Implement cgi and fast cgi interface
+// TODO: Implement cgi and fast cgi interface
 func (v *Vidar) Run() (err error) {
 	v.Server.Addr, err = v.resolveAddress()
 	if err != nil {

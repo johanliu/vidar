@@ -195,7 +195,7 @@ func (ctx *Context) SetPath(path string) {
 	ctx.path = path
 }
 
-//Response
+// Response
 func (ctx *Context) Error(err error) {
 	var code int
 	var content string

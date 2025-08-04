@@ -98,7 +98,7 @@ func (r *Router) Add(method string, path string, h http.Handler) {
 	r.tree.addNode(method, path, h)
 }
 
-//TODO: to be implemented
+// TODO: to be implemented
 func (r *Router) Find(path string) {
 	components := strings.Split(path, "/")[1:]
 	r.tree.findNode(components, nil)
