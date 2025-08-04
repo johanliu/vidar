@@ -96,7 +96,7 @@ func (v *Vidar) resolveAddress(addr ...string) (string, error) {
 	case 2:
 		return strings.Join(addr, ":"), nil
 	default:
-		v.log.Info("The number of parameters should be given as 0 or 2, but %s is given\n", len(addr))
+		v.log.Info("The number of parameters should be given as 0 or 2, but %d is given\n", len(addr))
 	}
 
 	v.log.Info("Use defalt address: localhost:8080")
