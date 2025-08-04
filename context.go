@@ -19,14 +19,17 @@ import (
 const defaultMaxMemory = 32 << 20 //32MB
 const indexPage = "/index.html"
 
+// Context represents the context of the current HTTP request.
+// It provides convenient methods to access request data and write responses.
 type Context struct {
-	request   *http.Request
-	response  *Response
-	container map[string]interface{}
-	path      string
-	Log       *mlog.Logger
+	request   *http.Request          // The HTTP request
+	response  *Response              // The HTTP response writer wrapper
+	container map[string]interface{} // Storage for request-scoped data
+	path      string                 // The request path
+	Log       *mlog.Logger           // Logger instance
 }
 
+// NewContext creates a new Context instance for handling HTTP requests.
 func NewContext(w http.ResponseWriter, r *http.Request) *Context {
 	c := &Context{
 		request:  r,
