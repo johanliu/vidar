@@ -29,9 +29,9 @@ func init() {
 		Version: "1.0",
 	}
 	tc.Log.Level = "INFO"
-	tc.Server.Host = "0.0.0.0"
-	tc.Server.Port = "8080"
-	
+	tc.Server.Host = DefaultHost
+	tc.Server.Port = DefaultPort
+
 	// Try to load config file if it exists
 	f, err := os.Open(configFile)
 	if err != nil {

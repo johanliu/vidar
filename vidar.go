@@ -4,7 +4,6 @@ import (
 	"net"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/johanliu/mlog"
 )
@@ -82,7 +81,7 @@ func (vl *vidarListener) Accept() (c net.Conn, err error) {
 	}
 
 	tc.SetKeepAlive(true)
-	tc.SetKeepAlivePeriod(5 * time.Minute)
+	tc.SetKeepAlivePeriod(DefaultKeepAlivePeriod)
 	return tc, nil
 }
 
@@ -105,12 +104,12 @@ func (v *Vidar) resolveAddress(addr ...string) (string, error) {
 			return tc.Server.Host + ":" + tc.Server.Port, nil
 		}
 		// Fall back to default
-		v.log.Info("Use default address: 0.0.0.0:8080")
-		return "0.0.0.0:8080", nil
+		v.log.Info("Use default address: %s", DefaultAddress)
+		return DefaultAddress, nil
 	case 2:
 		return strings.Join(addr, ":"), nil
 	default:
 		v.log.Info("The number of parameters should be given as 0 or 2, but %d is given", len(addr))
-		return "0.0.0.0:8080", nil
+		return DefaultAddress, nil
 	}
 }
