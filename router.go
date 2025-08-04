@@ -8,18 +8,20 @@ import (
 	"strings"
 )
 
+// Router handles HTTP request routing using a tree-based structure.
 type Router struct {
-	tree     *node
-	NotFound http.Handler
+	tree     *node        // Root node of the routing tree
+	NotFound http.Handler // Handler for 404 not found responses
 }
 
+// node represents a single node in the routing tree.
 type node struct {
-	height      int
-	children    []*node
-	component   string
-	isPathParam bool
-	isStatic    bool
-	handlers    map[string]http.Handler
+	height      int                     // Depth level in the tree
+	children    []*node                 // Child nodes
+	component   string                  // Path component (e.g., "users", ":id")
+	isPathParam bool                    // True if this is a path parameter (starts with ':')
+	isStatic    bool                    // True if this node serves static files
+	handlers    map[string]http.Handler // HTTP method to handler mapping
 }
 
 func (n *node) addNode(method, path string, h http.Handler) {
@@ -47,7 +49,7 @@ func (n *node) addNode(method, path string, h http.Handler) {
 			newNode.isPathParam = true
 		}
 
-		// Ugly, Ugly, need to be refactored
+		// TODO: Refactor wildcard matching logic for better maintainability
 		if component == "*" {
 			root.handlers[method] = h
 		}
@@ -98,7 +100,7 @@ func (r *Router) Add(method string, path string, h http.Handler) {
 	r.tree.addNode(method, path, h)
 }
 
-//TODO: to be implemented
+// TODO: to be implemented
 func (r *Router) Find(path string) {
 	components := strings.Split(path, "/")[1:]
 	r.tree.findNode(components, nil)

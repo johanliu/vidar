@@ -4,11 +4,20 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 )
 
 // MIME types
 const (
 	charsetUTF8 = "charset=UTF-8"
+)
+
+// Server configuration constants
+const (
+	DefaultHost            = "0.0.0.0"
+	DefaultPort            = "8080"
+	DefaultAddress         = DefaultHost + ":" + DefaultPort
+	DefaultKeepAlivePeriod = 5 * time.Minute
 )
 
 const (
@@ -91,16 +100,19 @@ var (
 	// CustomMessageError = NewHTTPError(http.StatusNoContent, "No record is found in etcd")
 )
 
+// Common error variables
 var (
-	TodoError   = errors.New("Todo Error")
-	FormatError = errors.New("Format Error")
+	TodoError   = errors.New("Todo Error")   // Placeholder for unimplemented functionality
+	FormatError = errors.New("Format Error") // Data format related errors
 )
 
+// HTTPError represents an HTTP error with status code and message.
 type HTTPError struct {
-	Code    int
-	Content string
+	Code    int    // HTTP status code
+	Content string // Error message content
 }
 
+// NewHTTPError creates a new HTTPError with the given status code and optional message.
 func NewHTTPError(code int, message ...string) *HTTPError {
 	var content string
 
@@ -113,6 +125,7 @@ func NewHTTPError(code int, message ...string) *HTTPError {
 	return &HTTPError{Code: code, Content: content}
 }
 
+// Error implements the error interface for HTTPError.
 func (he *HTTPError) Error() string {
 	return fmt.Sprint(he.Content)
 }
