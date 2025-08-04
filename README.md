@@ -80,6 +80,12 @@ func main() {
 ~~~
 
 
+## Project Management
+
+This project uses [ZenHub](https://www.zenhub.com) for enhanced project management directly within GitHub. ZenHub provides task boards, burndown charts, and milestone tracking to help organize development work.
+
+To access ZenHub features, [install the browser extension](https://www.zenhub.com) and log in with your GitHub account.
+
 ## TODO Lists
 
 1. Routing: Requests to function-call mapping with support for clean and dynamic URLs.
